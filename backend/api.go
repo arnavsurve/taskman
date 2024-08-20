@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,4 +38,19 @@ func AddUser(ctx *gin.Context, store *PostgresStore) {
 	} else {
 		ctx.JSON(http.StatusOK, "User successfully created")
 	}
+}
+
+func GetUserByID(ctx *gin.Context, store *PostgresStore, id string) (*Account, error) {
+	intId, err := strconv.Atoi(id)
+	if err != nil {
+		fmt.Println(err)
+		ctx.AbortWithStatusJSON(400, "Invalid ID entered. Enter an integer value")
+	}
+
+	row, err := store.db.Query(`select * from accounts where id = $1`, intId)
+	if err != nil {
+		fmt.Println(err)
+		ctx.AbortWithStatusJSON(404, "ID does not exist in accounts")
+	}
+	return nil, nil
 }

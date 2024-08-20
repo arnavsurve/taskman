@@ -29,6 +29,10 @@ func main() {
 	router.POST("/user", func(c *gin.Context) {
 		AddUser(c, store)
 	})
+	router.GET("/user/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		GetUserByID(c, store, id)
+	})
 
 	err = router.Run(":8080")
 	if err != nil {

@@ -2,22 +2,30 @@
 
 ## TODO
 
-### handlers (CRUD)
+### backend
+
+#### user
+
+- [x] account email field (case insensitive)
+- [ ] get user by id
+- [ ] edit user
+- [ ] delete user
+
+#### tasks 
+
+**task**
+- description
+- due date
+- completion (todo, in_progress, done)
 
 - [ ] new table  
-    - table = user workspace
-    - table name = userid (hash?) + table name
+    - [ ] each user gets a table
+        - how to authenticate?
+    - holds tasks
+    - foreign key account_id that references accounts(id)
 
 - [ ] new task
 - [ ] list tasks
 - [ ] delete task
 - [ ] edit task
-    - name
-    - description
-    - due date
-    - completion status (TODO/IN_PROGRESS/DONE)
 
-### DB
-
-- [x] account email field (case insensitive)
-- [ ] assign table(s) to individual users
