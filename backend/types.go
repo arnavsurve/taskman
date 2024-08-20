@@ -1,34 +1,26 @@
 package main
 
 import (
-	"math/rand"
+	"strings"
 	"time"
 )
 
-type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type CreateAccountRequest struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-}
-
 type Account struct {
 	ID        int       `json:"id"`
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
-	Number    int64     `json:"number"`
-	Balance   int64     `json:"balance"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-func NewAccount(firstName, lastName string) *Account {
+// NewAccount returns an Account object with a hashed password, case-insensitive email,
+// and generates a created at value.
+func NewAccount(username, password, email string) *Account {
+	hashedPassword, _ := HashPassword(password)
 	return &Account{
-		FirstName: firstName,
-		LastName:  lastName,
-		Number:    int64(rand.Intn(10000000)),
+		Username:  username,
+		Password:  hashedPassword,
+		Email:     strings.ToLower(email),
 		CreatedAt: time.Now().UTC(),
 	}
 }

@@ -51,6 +51,7 @@ func (s *PostgresStore) CreateAccountsTable() error {
         id serial primary key,
         username varchar(50),
         password varchar,
+        email varchar unique,
         created_at timestamp
     )`
 

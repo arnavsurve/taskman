@@ -9,7 +9,7 @@ import (
 )
 
 func AddUser(ctx *gin.Context, store *PostgresStore) {
-	body := User{}
+	body := Account{}
 
 	data, err := ctx.GetRawData()
 	if err != nil {
@@ -23,18 +23,14 @@ func AddUser(ctx *gin.Context, store *PostgresStore) {
 		return
 	}
 
-	hashedPassword, err := HashPassword(body.Password)
-	if err != nil {
-		fmt.Printf("Unable to hash password: %s\n", err)
-		return
-	}
+	newAccount := NewAccount(body.Username, body.Password, body.Email) // NewAccount returns a hashed password BTW
+	query := `
+        INSERT INTO accounts(username, password, email, created_at)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id
+    `
 
-	fmt.Println(body.Username, body.Password, hashedPassword)
-
-	_, err = store.db.Exec(`
-	       INSERT INTO accounts(username, password)
-	       values ($1, $2)
-	       `, body.Username, hashedPassword)
+	_, err = store.db.Exec(query, newAccount.Username, newAccount.Password, newAccount.Email, newAccount.CreatedAt)
 	if err != nil {
 		fmt.Println(err)
 		ctx.AbortWithStatusJSON(400, "Couldn't create the user")
