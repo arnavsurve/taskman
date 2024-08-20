@@ -16,3 +16,8 @@
     - description
     - due date
     - completion status (TODO/IN_PROGRESS/DONE)
+
+### DB
+
+- [x] account email field (case insensitive)
+- [ ] assign table(s) to individual users
