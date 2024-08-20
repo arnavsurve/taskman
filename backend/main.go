@@ -1,17 +1,24 @@
 package main
 
 import (
+	"log"
 	"net/http"
 
-	"github.com/arnavsurve/taskman/database"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	// gin.SetMode(gin.ReleaseMode)
+	store, err := NewPostgresStore()
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	if err := store.Init(); err != nil {
+		log.Fatal(err)
+	}
+
+	// gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	database.ConnectDatabase()
 
 	router.GET("/ping", func(context *gin.Context) {
 		context.IndentedJSON(http.StatusOK, gin.H{
@@ -19,7 +26,11 @@ func main() {
 		})
 	})
 
-	err := router.Run(":8080")
+	router.POST("/user", func(c *gin.Context) {
+		AddUser(c, store)
+	})
+
+	err = router.Run(":8080")
 	if err != nil {
 		panic(err)
 	}
