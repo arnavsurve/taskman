@@ -18,23 +18,32 @@ func main() {
 	}
 
 	// gin.SetMode(gin.ReleaseMode)
-	router := gin.Default()
+	r := gin.Default()
 
-	router.GET("/ping", func(context *gin.Context) {
-		context.IndentedJSON(http.StatusOK, gin.H{
+	// Apply AuthMiddleware to routes that require authentication
+	authRoutes := r.Group("/")
+	authRoutes.Use(AuthMiddleware())
+	{
+		authRoutes.PUT("/user/:id", func(ctx *gin.Context) {
+			EditUser(ctx, store)
+		})
+	}
+
+	r.GET("/ping", func(ctx *gin.Context) {
+		ctx.IndentedJSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
 
-	router.POST("/user", func(c *gin.Context) {
-		AddUser(c, store)
-	})
-	router.GET("/user/:id", func(c *gin.Context) {
-		id := c.Param("id")
-		GetUserByID(c, store, id)
+	r.POST("/user", func(ctx *gin.Context) {
+		AddUser(ctx, store)
 	})
 
-	err = router.Run(":8080")
+	r.GET("/user/:id", func(ctx *gin.Context) {
+		GetUserByID(ctx, store)
+	})
+
+	err = r.Run(":8080")
 	if err != nil {
 		panic(err)
 	}

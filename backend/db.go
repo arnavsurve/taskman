@@ -58,3 +58,16 @@ func (s *PostgresStore) CreateAccountsTable() error {
 	_, err := s.db.Exec(query)
 	return err
 }
+
+func (s *PostgresStore) CreateTasksTable(id int, tableName string) error {
+	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %d_%s (
+        task_id serial primary key,
+		description varchar(255),
+		due_date timestamp,
+		completion varchar(20) check (completion in ('todo', 'in_progress', 'done')),
+		account_id int references accounts(id)
+    )`, id, tableName)
+
+	_, err := s.db.Exec(query)
+	return err
+}
