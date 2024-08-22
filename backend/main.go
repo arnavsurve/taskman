@@ -33,6 +33,10 @@ func main() {
 		authRoutes.POST("/table/:id", func(ctx *gin.Context) {
 			api.HandleCreateTasksTable(ctx, store)
 		})
+
+		authRoutes.POST("/task/:id/:table", func(ctx *gin.Context) {
+			api.HandleCreateTask(ctx, store)
+		})
 	}
 
 	r.GET("/ping", func(ctx *gin.Context) {

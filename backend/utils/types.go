@@ -16,6 +16,21 @@ type LoginFields struct {
 	Password string `json:"password"`
 }
 
+type CompletionStatus string
+
+const (
+	Todo       CompletionStatus = "TODO"
+	InProgress CompletionStatus = "IN_PROGRESS"
+	Done       CompletionStatus = "DONE"
+)
+
+type Task struct {
+	Description      string           `json:"description"`
+	DueDate          time.Time        `json:"due_date"`
+	CompletionStatus CompletionStatus `json:"completion"`
+	AccountId        int              `json:"account_id"`
+}
+
 type Table struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
@@ -40,13 +55,3 @@ func NewAccount(username, password, email string) *Account {
 		CreatedAt: time.Now().UTC(),
 	}
 }
-
-// func GetAccountByID(id int) *Account {
-// 	return &Account{
-//         ID: id,
-// 		Username:  Account.username,
-// 		Password:  hashedPassword,
-// 		Email:     strings.ToLower(email),
-// 		CreatedAt: time.Now().UTC(),
-// 	}
-// }

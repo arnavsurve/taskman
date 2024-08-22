@@ -60,7 +60,8 @@ func (s *PostgresStore) CreateAccountsTable() error {
 	return err
 }
 
-func (s *PostgresStore) CreateTasksTable(id string, tableName string) (string, error) {
+// CreateTasksTable creates a new table for a user's tasks with the naming convention t_{id}_{tableName}
+func (s *PostgresStore) CreateTasksTable(id, tableName string) (string, error) {
 	name := fmt.Sprintf("t_%s_%s", id, tableName)
 	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
         task_id serial primary key,
@@ -71,8 +72,45 @@ func (s *PostgresStore) CreateTasksTable(id string, tableName string) (string, e
     )`, pq.QuoteIdentifier(name)) // Avoid SQL injection
 
 	_, err := s.DB.Exec(query)
-	if err == nil {
+	if err != nil {
+		return "", err
+	} else {
 		fmt.Println("Created:", name)
 	}
 	return name, err
+}
+
+// CreateTask creates a new task in the table with the given name
+func (s *PostgresStore) CreateTask(tableName, description, dueDate, completion string, accountId int) (string, error) {
+	query := fmt.Sprintf(`INSERT INTO %s(
+        description, 
+        due_date, 
+        completion, 
+        account_id)
+        VALUES ($1, $2, $3, $4)`, pq.QuoteIdentifier(tableName))
+
+	_, err := s.DB.Exec(query, description, dueDate, completion, accountId)
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("Created:", tableName)
+	return tableName, nil
+}
+
+// TableExists returns a boolean based on the existence of a table in the database
+func TableExists(store *PostgresStore, tableName string) (bool, error) {
+	query := `
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public'
+            AND table_name = $1
+        );`
+
+	var exists bool
+	err := store.DB.QueryRow(query, tableName).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, err
 }
