@@ -24,6 +24,8 @@ const (
 )
 
 type Task struct {
+	TaskID           int              `json:"task_id"`
+	Name             string           `json:"name"`
 	Description      string           `json:"description"`
 	DueDate          time.Time        `json:"due_date"`   // ex. "due_date": "2023-10-06T15:04:05Z"
 	CompletionStatus CompletionStatus `json:"completion"` // todo, in_progress, done

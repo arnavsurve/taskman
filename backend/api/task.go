@@ -80,7 +80,7 @@ func HandleCreateTask(ctx *gin.Context, store *db.PostgresStore) {
 		return
 	}
 
-	name, err := store.CreateTask(requestedTable, newTask.Description, newTask.DueDate, newTask.CompletionStatus, intRequestedID)
+	name, err := store.CreateTask(requestedTable, newTask.Name, newTask.Description, newTask.DueDate, newTask.CompletionStatus, intRequestedID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating task"})
 		fmt.Println(err)
@@ -88,4 +88,18 @@ func HandleCreateTask(ctx *gin.Context, store *db.PostgresStore) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"table": name})
+}
+
+func HandleListTasks(ctx *gin.Context, store *db.PostgresStore) {
+	userClaims := ctx.MustGet("user").(jwt.MapClaims)
+	userID := int(userClaims["id"].(float64))
+
+	// Verify user's ID matches ID of the resource
+	requestedID := ctx.Param("id")
+	intRequestedID, err := strconv.Atoi(requestedID)
+	if err != nil || intRequestedID != userID {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 }

@@ -67,6 +67,7 @@ func (s *PostgresStore) CreateTasksTable(id, tableName string) (string, error) {
 	name := fmt.Sprintf("t_%s_%s", id, tableName)
 	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
         task_id serial primary key,
+        name varchar(50),
 		description varchar(255),
 		due_date timestamp,
 		completion varchar(20) check (completion in ('todo', 'in_progress', 'done')),
@@ -83,15 +84,16 @@ func (s *PostgresStore) CreateTasksTable(id, tableName string) (string, error) {
 }
 
 // CreateTask creates a new task in the table with the given name
-func (s *PostgresStore) CreateTask(tableName, description string, dueDate time.Time, completion shared.CompletionStatus, accountId int) (string, error) {
+func (s *PostgresStore) CreateTask(tableName, name, description string, dueDate time.Time, completion shared.CompletionStatus, accountId int) (string, error) {
 	query := fmt.Sprintf(`INSERT INTO %s(
+        name,
         description, 
         due_date, 
         completion, 
         account_id)
-        VALUES ($1, $2, $3, $4)`, pq.QuoteIdentifier(tableName))
+        VALUES ($1, $2, $3, $4, $5)`, pq.QuoteIdentifier(tableName))
 
-	_, err := s.DB.Exec(query, description, dueDate, completion, accountId)
+	_, err := s.DB.Exec(query, name, description, dueDate, completion, accountId)
 	if err != nil {
 		return "", err
 	}
@@ -99,6 +101,11 @@ func (s *PostgresStore) CreateTask(tableName, description string, dueDate time.T
 	fmt.Println("Created:", tableName)
 	return tableName, nil
 }
+
+// func (s *PostgresStore) GetTasks(id, tableName string) ([]byte, error) {
+// 	query := `SELECT task_id, description, due_date, completion FROM`
+// 	rows, err := s.DB.Query()
+// }
 
 // TableExists returns a boolean based on the existence of a table in the database
 func (s *PostgresStore) TableExists(tableName string) (bool, error) {
