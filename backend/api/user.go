@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"database/sql"
@@ -6,20 +6,22 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/arnavsurve/taskman/backend/db"
+	"github.com/arnavsurve/taskman/backend/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
 // Login authenticates a user with their username and password and returns a JWT for the session
-func Login(ctx *gin.Context, store *PostgresStore) {
-	credentials := LoginFields{}
+func Login(ctx *gin.Context, store *db.PostgresStore) {
+	credentials := utils.LoginFields{}
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Verify password
-	valid, err := VerifyPassword(credentials.Username, credentials.Password, store)
+	valid, err := utils.VerifyPassword(credentials.Username, credentials.Password, store)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
@@ -32,14 +34,14 @@ func Login(ctx *gin.Context, store *PostgresStore) {
 	// Retrieve user ID
 	var userID int
 	query := `select id from accounts where username = $1`
-	err = store.db.QueryRow(query, credentials.Username).Scan(&userID)
+	err = store.DB.QueryRow(query, credentials.Username).Scan(&userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user ID"})
 		return
 	}
 
 	// Generate JWT token
-	token, err := GenerateToken(userID)
+	token, err := utils.GenerateToken(userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
@@ -49,28 +51,28 @@ func Login(ctx *gin.Context, store *PostgresStore) {
 }
 
 // AddUser adds a user to the database
-func AddUser(ctx *gin.Context, store *PostgresStore) {
-	account := Account{}
+func AddUser(ctx *gin.Context, store *db.PostgresStore) {
+	account := utils.Account{}
 	if err := ctx.ShouldBindJSON(&account); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	newAccount := NewAccount(account.Username, account.Password, account.Email) // NewAccount returns a hashed password BTW
+	newAccount := utils.NewAccount(account.Username, account.Password, account.Email) // NewAccount returns a hashed password BTW
 	query := `
         INSERT INTO accounts(username, password, email, created_at)
         VALUES ($1, $2, $3, $4)
         RETURNING id
     `
 	var userID int
-	err := store.db.QueryRow(query, newAccount.Username, newAccount.Password, newAccount.Email, newAccount.CreatedAt).Scan(&userID)
+	err := store.DB.QueryRow(query, newAccount.Username, newAccount.Password, newAccount.Email, newAccount.CreatedAt).Scan(&userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
 	// Generate JWT token
-	token, err := GenerateToken(newAccount.ID)
+	token, err := utils.GenerateToken(newAccount.ID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
@@ -80,7 +82,7 @@ func AddUser(ctx *gin.Context, store *PostgresStore) {
 }
 
 // GetUserByID retrieves a user's id, username, email, and creation date from the database by ID
-func GetUserByID(ctx *gin.Context, store *PostgresStore) (*Account, error) {
+func GetUserByID(ctx *gin.Context, store *db.PostgresStore) (*utils.Account, error) {
 	id := ctx.Param("id")
 	intId, err := strconv.Atoi(id)
 	if err != nil {
@@ -88,13 +90,13 @@ func GetUserByID(ctx *gin.Context, store *PostgresStore) (*Account, error) {
 		ctx.AbortWithStatusJSON(400, "Invalid ID entered. Enter an integer value")
 	}
 
-	row := store.db.QueryRow(`select id,
+	row := store.DB.QueryRow(`select id,
 							username,
 							email,
 							created_at 
 							from accounts where id = $1`, intId)
 
-	account := Account{}
+	account := utils.Account{}
 	err = row.Scan(&account.ID, &account.Username, &account.Email, &account.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -109,7 +111,7 @@ func GetUserByID(ctx *gin.Context, store *PostgresStore) (*Account, error) {
 	return &account, nil
 }
 
-func EditUser(ctx *gin.Context, store *PostgresStore) {
+func EditUser(ctx *gin.Context, store *db.PostgresStore) {
 	userClaims := ctx.MustGet("user").(jwt.MapClaims)
 	userID := int(userClaims["id"].(float64))
 
@@ -120,49 +122,18 @@ func EditUser(ctx *gin.Context, store *PostgresStore) {
 		return
 	}
 
-	account := Account{}
+	account := utils.Account{}
 	if err := ctx.ShouldBindJSON(&account); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	query := `update accounts set username = $1, email = $2 where id = $3`
-	_, err = store.db.Exec(query, account.Username, account.Email, intId)
+	_, err = store.DB.Exec(query, account.Username, account.Email, intId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "User successfully updated"})
-}
-
-func HandleCreateTasksTable(ctx *gin.Context, store *PostgresStore) {
-	userClaims := ctx.MustGet("user").(jwt.MapClaims)
-	userID := int(userClaims["id"].(float64))
-
-	requestedID := ctx.Param("id")
-	intRequestedID, err := strconv.Atoi(requestedID)
-	if err != nil || intRequestedID != userID {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	table := Table{}
-	if err := ctx.ShouldBindJSON(&table); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	if table.Name == "" {
-		ctx.AbortWithStatusJSON(500, "Table name cannot be empty")
-		return
-	}
-
-	name, err := store.CreateTasksTable(requestedID, table.Name)
-	if err != nil {
-		fmt.Println(err)
-		ctx.AbortWithStatusJSON(500, "Failed to create table")
-		return
-	}
-
-	ctx.JSON(http.StatusOK, name)
 }

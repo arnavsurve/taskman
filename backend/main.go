@@ -4,11 +4,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/arnavsurve/taskman/backend/api"
+	"github.com/arnavsurve/taskman/backend/db"
+	"github.com/arnavsurve/taskman/backend/utils"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	store, err := NewPostgresStore()
+	store, err := db.NewPostgresStore()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -22,13 +25,13 @@ func main() {
 
 	// Apply AuthMiddleware to routes that require authentication
 	authRoutes := r.Group("/")
-	authRoutes.Use(AuthMiddleware())
+	authRoutes.Use(utils.AuthMiddleware())
 	{
 		authRoutes.PUT("/user/:id", func(ctx *gin.Context) {
-			EditUser(ctx, store)
+			api.EditUser(ctx, store)
 		})
 		authRoutes.POST("/table/:id", func(ctx *gin.Context) {
-			HandleCreateTasksTable(ctx, store)
+			api.HandleCreateTasksTable(ctx, store)
 		})
 	}
 
@@ -39,13 +42,13 @@ func main() {
 	})
 
 	r.GET("/login", func(ctx *gin.Context) {
-		Login(ctx, store)
+		api.Login(ctx, store)
 	})
 	r.POST("/user", func(ctx *gin.Context) {
-		AddUser(ctx, store)
+		api.AddUser(ctx, store)
 	})
 	r.GET("/user/:id", func(ctx *gin.Context) {
-		GetUserByID(ctx, store)
+		api.GetUserByID(ctx, store)
 	})
 
 	err = r.Run(":8080")
