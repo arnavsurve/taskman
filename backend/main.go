@@ -27,6 +27,9 @@ func main() {
 		authRoutes.PUT("/user/:id", func(ctx *gin.Context) {
 			EditUser(ctx, store)
 		})
+		authRoutes.POST("/table/:id", func(ctx *gin.Context) {
+			HandleCreateTasksTable(ctx, store)
+		})
 	}
 
 	r.GET("/ping", func(ctx *gin.Context) {
@@ -35,10 +38,12 @@ func main() {
 		})
 	})
 
+	r.GET("/login", func(ctx *gin.Context) {
+		Login(ctx, store)
+	})
 	r.POST("/user", func(ctx *gin.Context) {
 		AddUser(ctx, store)
 	})
-
 	r.GET("/user/:id", func(ctx *gin.Context) {
 		GetUserByID(ctx, store)
 	})

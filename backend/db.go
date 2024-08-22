@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 )
 
@@ -59,15 +60,19 @@ func (s *PostgresStore) CreateAccountsTable() error {
 	return err
 }
 
-func (s *PostgresStore) CreateTasksTable(id int, tableName string) error {
-	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %d_%s (
+func (s *PostgresStore) CreateTasksTable(id string, tableName string) (string, error) {
+	name := fmt.Sprintf("t_%s_%s", id, tableName)
+	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
         task_id serial primary key,
 		description varchar(255),
 		due_date timestamp,
 		completion varchar(20) check (completion in ('todo', 'in_progress', 'done')),
 		account_id int references accounts(id)
-    )`, id, tableName)
+    )`, pq.QuoteIdentifier(name)) // Avoid SQL injection
 
 	_, err := s.db.Exec(query)
-	return err
+	if err == nil {
+		fmt.Println("Created:", name)
+	}
+	return name, err
 }

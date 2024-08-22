@@ -1,9 +1,25 @@
 package main
 
 import (
+	"github.com/dgrijalva/jwt-go"
 	"strings"
 	"time"
 )
+
+type JWTClaims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
+
+type LoginFields struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type Table struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
 
 type Account struct {
 	ID        int       `json:"id"`
@@ -24,3 +40,13 @@ func NewAccount(username, password, email string) *Account {
 		CreatedAt: time.Now().UTC(),
 	}
 }
+
+// func GetAccountByID(id int) *Account {
+// 	return &Account{
+//         ID: id,
+// 		Username:  Account.username,
+// 		Password:  hashedPassword,
+// 		Email:     strings.ToLower(email),
+// 		CreatedAt: time.Now().UTC(),
+// 	}
+// }
