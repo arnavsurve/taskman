@@ -2,6 +2,14 @@
 
 ## TODO
 
+
+### cli/tui
+
+- [ ] [bubbletea](https://github.com/charmbracelet/bubbletea)
+    - [bubbles (TUI components for bubbletea)](https://github.com/charmbracelet/bubbles)
+    - [bubble-table](https://github.com/Evertras/bubble-table)
+
+
 ### backend
 
 #### general
@@ -36,10 +44,12 @@
     - holds tasks
     - foreign key account_id that references accounts(id)
 
-- [ ] new task
+- [x] new task
+    - [ ] work on date formatting when it comes up
 - [ ] list tasks
 - [ ] delete task
 - [ ] edit task
+
 
 
 ### misc
