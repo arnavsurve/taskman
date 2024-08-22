@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/arnavsurve/taskman/backend/shared"
 	"github.com/joho/godotenv"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
@@ -81,7 +82,7 @@ func (s *PostgresStore) CreateTasksTable(id, tableName string) (string, error) {
 }
 
 // CreateTask creates a new task in the table with the given name
-func (s *PostgresStore) CreateTask(tableName, description, dueDate, completion string, accountId int) (string, error) {
+func (s *PostgresStore) CreateTask(tableName, description, dueDate string, completion shared.CompletionStatus, accountId int) (string, error) {
 	query := fmt.Sprintf(`INSERT INTO %s(
         description, 
         due_date, 

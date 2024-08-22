@@ -4,7 +4,10 @@ import (
 	"database/sql"
 
 	"github.com/arnavsurve/taskman/backend/db"
+	"github.com/arnavsurve/taskman/backend/shared"
 	"golang.org/x/crypto/bcrypt"
+	"strings"
+	"time"
 )
 
 // HashPassword takes a plaintext password and returns a password hash string
@@ -33,4 +36,16 @@ func VerifyPassword(username, password string, store *db.PostgresStore) (bool, e
 		return false, nil
 	}
 	return true, nil
+}
+
+// NewAccount returns an Account object with a hashed password, case-insensitive email,
+// and generates a created at value.
+func NewAccount(username, password, email string) *shared.Account {
+	hashedPassword, _ := HashPassword(password)
+	return &shared.Account{
+		Username:  username,
+		Password:  hashedPassword,
+		Email:     strings.ToLower(email),
+		CreatedAt: time.Now().UTC(),
+	}
 }

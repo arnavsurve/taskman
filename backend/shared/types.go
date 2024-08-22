@@ -1,8 +1,7 @@
-package utils
+package shared
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"strings"
 	"time"
 )
 
@@ -42,16 +41,4 @@ type Account struct {
 	Password  string    `json:"password"`
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"createdAt"`
-}
-
-// NewAccount returns an Account object with a hashed password, case-insensitive email,
-// and generates a created at value.
-func NewAccount(username, password, email string) *Account {
-	hashedPassword, _ := HashPassword(password)
-	return &Account{
-		Username:  username,
-		Password:  hashedPassword,
-		Email:     strings.ToLower(email),
-		CreatedAt: time.Now().UTC(),
-	}
 }

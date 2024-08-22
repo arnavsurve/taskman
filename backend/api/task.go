@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/arnavsurve/taskman/backend/db"
-	"github.com/arnavsurve/taskman/backend/utils"
+	"github.com/arnavsurve/taskman/backend/shared"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +22,7 @@ func HandleCreateTasksTable(ctx *gin.Context, store *db.PostgresStore) {
 		return
 	}
 
-	table := utils.Table{}
+	table := shared.Table{}
 	if err := ctx.ShouldBindJSON(&table); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -61,7 +61,7 @@ func HandleCreateTask(ctx *gin.Context, store *db.PostgresStore) {
 		return
 	}
 
-	newTask := utils.Task{}
+	newTask := shared.Task{}
 	if err := ctx.ShouldBindJSON(&newTask); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

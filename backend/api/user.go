@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/arnavsurve/taskman/backend/db"
+	"github.com/arnavsurve/taskman/backend/shared"
 	"github.com/arnavsurve/taskman/backend/utils"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ import (
 
 // Login authenticates a user with their username and password and returns a JWT for the session
 func Login(ctx *gin.Context, store *db.PostgresStore) {
-	credentials := utils.LoginFields{}
+	credentials := shared.LoginFields{}
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -52,7 +53,7 @@ func Login(ctx *gin.Context, store *db.PostgresStore) {
 
 // AddUser adds a user to the database
 func AddUser(ctx *gin.Context, store *db.PostgresStore) {
-	account := utils.Account{}
+	account := shared.Account{}
 	if err := ctx.ShouldBindJSON(&account); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -82,7 +83,7 @@ func AddUser(ctx *gin.Context, store *db.PostgresStore) {
 }
 
 // GetUserByID retrieves a user's id, username, email, and creation date from the database by ID
-func GetUserByID(ctx *gin.Context, store *db.PostgresStore) (*utils.Account, error) {
+func GetUserByID(ctx *gin.Context, store *db.PostgresStore) (*shared.Account, error) {
 	id := ctx.Param("id")
 	intId, err := strconv.Atoi(id)
 	if err != nil {
@@ -96,7 +97,7 @@ func GetUserByID(ctx *gin.Context, store *db.PostgresStore) (*utils.Account, err
 							created_at 
 							from accounts where id = $1`, intId)
 
-	account := utils.Account{}
+	account := shared.Account{}
 	err = row.Scan(&account.ID, &account.Username, &account.Email, &account.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -122,7 +123,7 @@ func EditUser(ctx *gin.Context, store *db.PostgresStore) {
 		return
 	}
 
-	account := utils.Account{}
+	account := shared.Account{}
 	if err := ctx.ShouldBindJSON(&account); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
