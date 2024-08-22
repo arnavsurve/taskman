@@ -51,6 +51,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+// parseToken takes a JWT token string as input and returns its claims if the token is valid.
 func parseToken(tokenString string) (jwt.MapClaims, error) {
 	secretKey := os.Getenv("JWT_SECRET_KEY")
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {

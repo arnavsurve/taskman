@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/arnavsurve/taskman/backend/shared"
 	"github.com/joho/godotenv"
@@ -82,7 +83,7 @@ func (s *PostgresStore) CreateTasksTable(id, tableName string) (string, error) {
 }
 
 // CreateTask creates a new task in the table with the given name
-func (s *PostgresStore) CreateTask(tableName, description, dueDate string, completion shared.CompletionStatus, accountId int) (string, error) {
+func (s *PostgresStore) CreateTask(tableName, description string, dueDate time.Time, completion shared.CompletionStatus, accountId int) (string, error) {
 	query := fmt.Sprintf(`INSERT INTO %s(
         description, 
         due_date, 
@@ -100,7 +101,7 @@ func (s *PostgresStore) CreateTask(tableName, description, dueDate string, compl
 }
 
 // TableExists returns a boolean based on the existence of a table in the database
-func TableExists(store *PostgresStore, tableName string) (bool, error) {
+func (s *PostgresStore) TableExists(tableName string) (bool, error) {
 	query := `
         SELECT EXISTS (
             SELECT FROM information_schema.tables 
@@ -109,7 +110,7 @@ func TableExists(store *PostgresStore, tableName string) (bool, error) {
         );`
 
 	var exists bool
-	err := store.DB.QueryRow(query, tableName).Scan(&exists)
+	err := s.DB.QueryRow(query, tableName).Scan(&exists)
 	if err != nil {
 		return false, err
 	}

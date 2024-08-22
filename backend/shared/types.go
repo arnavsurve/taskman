@@ -18,15 +18,15 @@ type LoginFields struct {
 type CompletionStatus string
 
 const (
-	Todo       CompletionStatus = "TODO"
-	InProgress CompletionStatus = "IN_PROGRESS"
-	Done       CompletionStatus = "DONE"
+	Todo       CompletionStatus = "todo"
+	InProgress CompletionStatus = "in_progress"
+	Done       CompletionStatus = "done"
 )
 
 type Task struct {
 	Description      string           `json:"description"`
-	DueDate          time.Time        `json:"due_date"`
-	CompletionStatus CompletionStatus `json:"completion"`
+	DueDate          time.Time        `json:"due_date"`   // ex. "due_date": "2023-10-06T15:04:05Z"
+	CompletionStatus CompletionStatus `json:"completion"` // todo, in_progress, done
 	AccountId        int              `json:"account_id"`
 }
 
