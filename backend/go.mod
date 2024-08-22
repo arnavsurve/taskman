@@ -1,4 +1,4 @@
-module github.com/arnavsurve/taskman
+module github.com/arnavsurve/taskman/backend
 
 go 1.22.4
 

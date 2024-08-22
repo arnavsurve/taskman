@@ -1,8 +1,9 @@
-package main
+package utils
 
 import (
 	"database/sql"
 
+	"github.com/arnavsurve/taskman/backend/db"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -13,11 +14,11 @@ func HashPassword(password string) (string, error) {
 }
 
 // VerifyPassword checks whether a plaintext password matches the requested account's hashed password in the DB
-func VerifyPassword(username, password string, store *PostgresStore) (bool, error) {
+func VerifyPassword(username, password string, store *db.PostgresStore) (bool, error) {
 	var hashedPassword string
 
 	query := `SELECT password from accounts where username = $1`
-	err := store.db.QueryRow(query, username).Scan(&hashedPassword)
+	err := store.DB.QueryRow(query, username).Scan(&hashedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// username not found

@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"database/sql"
@@ -12,7 +12,7 @@ import (
 )
 
 type PostgresStore struct {
-	db *sql.DB
+	DB *sql.DB
 }
 
 func NewPostgresStore() (*PostgresStore, error) {
@@ -39,7 +39,7 @@ func NewPostgresStore() (*PostgresStore, error) {
 	fmt.Println("DB connection successful")
 
 	return &PostgresStore{
-		db: db,
+		DB: db,
 	}, nil
 }
 
@@ -56,7 +56,7 @@ func (s *PostgresStore) CreateAccountsTable() error {
         created_at timestamp
     )`
 
-	_, err := s.db.Exec(query)
+	_, err := s.DB.Exec(query)
 	return err
 }
 
@@ -70,7 +70,7 @@ func (s *PostgresStore) CreateTasksTable(id string, tableName string) (string, e
 		account_id int references accounts(id)
     )`, pq.QuoteIdentifier(name)) // Avoid SQL injection
 
-	_, err := s.db.Exec(query)
+	_, err := s.DB.Exec(query)
 	if err == nil {
 		fmt.Println("Created:", name)
 	}
