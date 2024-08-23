@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	// "os"
 
 	"github.com/arnavsurve/taskman/backend/api"
 	"github.com/arnavsurve/taskman/backend/db"
@@ -20,6 +21,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Initialize DB with an admin user
+	// adminUsername := os.Getenv("DB_ADMIN_USERNAME")
+	// adminPassword := os.Getenv("DB_ADMIN_PASSWORD")
+
+	// api.AddUser(, store)
+
 	// gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
@@ -27,6 +34,9 @@ func main() {
 	authRoutes := r.Group("/")
 	authRoutes.Use(utils.AuthMiddleware())
 	{
+		authRoutes.GET("/user/:id", func(ctx *gin.Context) {
+			api.GetUserByID(ctx, store)
+		})
 		authRoutes.PUT("/user/:id", func(ctx *gin.Context) {
 			api.EditUser(ctx, store)
 		})
@@ -34,7 +44,7 @@ func main() {
 			api.HandleCreateTasksTable(ctx, store)
 		})
 
-		authRoutes.POST("/task/:id/:table", func(ctx *gin.Context) {
+		authRoutes.POST("/task/:id/:workspace", func(ctx *gin.Context) {
 			api.HandleCreateTask(ctx, store)
 		})
 	}
@@ -44,15 +54,11 @@ func main() {
 			"message": "pong",
 		})
 	})
-
 	r.GET("/login", func(ctx *gin.Context) {
 		api.Login(ctx, store)
 	})
 	r.POST("/user", func(ctx *gin.Context) {
 		api.AddUser(ctx, store)
-	})
-	r.GET("/user/:id", func(ctx *gin.Context) {
-		api.GetUserByID(ctx, store)
 	})
 
 	err = r.Run(":8080")

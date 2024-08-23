@@ -63,8 +63,8 @@ func (s *PostgresStore) CreateAccountsTable() error {
 }
 
 // CreateTasksTable creates a new table for a user's tasks with the naming convention t_{id}_{tableName}
-func (s *PostgresStore) CreateTasksTable(id, tableName string) (string, error) {
-	name := fmt.Sprintf("t_%s_%s", id, tableName)
+func (s *PostgresStore) CreateTasksTable(id, workspaceName string) (string, error) {
+	name := fmt.Sprintf("t_%s_%s", id, workspaceName)
 	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
         task_id serial primary key,
         name varchar(50),
@@ -102,10 +102,32 @@ func (s *PostgresStore) CreateTask(tableName, name, description string, dueDate 
 	return tableName, nil
 }
 
-// func (s *PostgresStore) GetTasks(id, tableName string) ([]byte, error) {
-// 	query := `SELECT task_id, description, due_date, completion FROM`
-// 	rows, err := s.DB.Query()
-// }
+// GetTasks queries the database and returns a slice of tasks
+func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
+	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion FROM %s`, tableName)
+	rows, err := s.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []shared.Task
+
+	for rows.Next() {
+		task := shared.Task{}
+		err := rows.Scan(&task.TaskID, &task.Name, &task.Description, &task.DueDate, &task.CompletionStatus)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
 
 // TableExists returns a boolean based on the existence of a table in the database
 func (s *PostgresStore) TableExists(tableName string) (bool, error) {
