@@ -63,8 +63,8 @@ func (s *PostgresStore) CreateAccountsTable() error {
 }
 
 // CreateTasksTable creates a new table for a user's tasks with the naming convention t_{id}_{tableName}
-func (s *PostgresStore) CreateTasksTable(id, tableName string) (string, error) {
-	name := fmt.Sprintf("t_%s_%s", id, tableName)
+func (s *PostgresStore) CreateTasksTable(id, workspaceName string) (string, error) {
+	name := fmt.Sprintf("t_%s_%s", id, workspaceName)
 	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
         task_id serial primary key,
         name varchar(50),
@@ -123,6 +123,7 @@ func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
 		tasks = append(tasks, task)
 	}
 	if err = rows.Err(); err != nil {
+
 		return nil, err
 	}
 

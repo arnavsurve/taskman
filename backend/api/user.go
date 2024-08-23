@@ -84,11 +84,14 @@ func AddUser(ctx *gin.Context, store *db.PostgresStore) {
 
 // GetUserByID retrieves a user's id, username, email, and creation date from the database by ID
 func GetUserByID(ctx *gin.Context, store *db.PostgresStore) (*shared.Account, error) {
+	userClaims := ctx.MustGet("user").(jwt.MapClaims)
+	userID := int(userClaims["id"].(float64))
+
 	id := ctx.Param("id")
 	intId, err := strconv.Atoi(id)
-	if err != nil {
-		fmt.Println(err)
-		ctx.AbortWithStatusJSON(400, "Invalid ID entered. Enter an integer value")
+	if err != nil || userID != intId {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return nil, err
 	}
 
 	row := store.DB.QueryRow(`select id,
@@ -103,8 +106,7 @@ func GetUserByID(ctx *gin.Context, store *db.PostgresStore) (*shared.Account, er
 		if err == sql.ErrNoRows {
 			ctx.AbortWithStatusJSON(404, "ID does not exist in accounts")
 		} else {
-			fmt.Println(err)
-			ctx.AbortWithStatusJSON(500, "Internal server error")
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		}
 		return nil, err
 	}
@@ -128,6 +130,8 @@ func EditUser(ctx *gin.Context, store *db.PostgresStore) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	fmt.Println(account)
 
 	query := `update accounts set username = $1, email = $2 where id = $3`
 	_, err = store.DB.Exec(query, account.Username, account.Email, intId)

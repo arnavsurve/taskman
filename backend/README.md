@@ -18,6 +18,11 @@
 - [x] comment code 8/22/24
 
 
+#### testing
+
+- [ ] write test cases facepalm emoji
+
+
 #### user
 
 - [x] account email field (case insensitive)
@@ -26,6 +31,12 @@
     - [ ] reset password
 - [ ] delete user
 - [x] login (return jwt)
+- [ ] get all/list users
+
+- [x] require JWT for GET /user/:id
+
+- [ ] initialize db prepopulated with admin user
+    - use `.env` for password
 
 
 #### tasks 
@@ -47,6 +58,7 @@
 - [x] new task
     - [ ] work on date formatting when it comes up
 - [ ] list tasks
+- [ ] get task by id
 - [ ] delete task
 - [ ] edit task
 
