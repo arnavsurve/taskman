@@ -102,10 +102,32 @@ func (s *PostgresStore) CreateTask(tableName, name, description string, dueDate 
 	return tableName, nil
 }
 
-// func (s *PostgresStore) GetTasks(id, tableName string) ([]byte, error) {
-// 	query := `SELECT task_id, description, due_date, completion FROM`
-// 	rows, err := s.DB.Query()
-// }
+func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
+	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
+                            FROM %s
+                            ORDER BY due_date`, tableName)
+	rows, err := s.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []shared.Task
+
+	for rows.Next() {
+		task := shared.Task{}
+		err := rows.Scan(&task.TaskID, &task.Name, &task.Description, &task.DueDate, &task.CompletionStatus, &task.AccountId)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
 
 // TableExists returns a boolean based on the existence of a table in the database
 func (s *PostgresStore) TableExists(tableName string) (bool, error) {

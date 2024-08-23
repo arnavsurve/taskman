@@ -34,8 +34,11 @@ func main() {
 			api.HandleCreateTasksTable(ctx, store)
 		})
 
-		authRoutes.POST("/task/:id/:table", func(ctx *gin.Context) {
+		authRoutes.POST("/task/:id/:workspace", func(ctx *gin.Context) {
 			api.HandleCreateTask(ctx, store)
+		})
+		authRoutes.GET("/task/:id/:workspace", func(ctx *gin.Context) {
+			api.HandleGetTasks(ctx, store)
 		})
 	}
 
