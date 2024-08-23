@@ -115,10 +115,24 @@ func HandleGetTasks(ctx *gin.Context, store *db.PostgresStore) {
 	// Checking if the requested table for the task exists
 	workspaceName := ctx.Param("workspace")
 	requestedTable := fmt.Sprintf("t_%s_%s", requestedID, workspaceName)
+
 	exists, err := store.TableExists(requestedTable)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if table exists"})
+		fmt.Println(err)
+		return
+	}
 	if exists != true {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Table does not exist"})
 		return
 	}
 
+	tasks, err := store.GetTasks(requestedID, requestedTable)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving tasks"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"tasks": tasks})
 }

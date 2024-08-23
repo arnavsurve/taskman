@@ -47,6 +47,9 @@ func main() {
 		authRoutes.POST("/task/:id/:workspace", func(ctx *gin.Context) {
 			api.HandleCreateTask(ctx, store)
 		})
+		authRoutes.GET("/task/:id/:workspace", func(ctx *gin.Context) {
+			api.HandleGetTasks(ctx, store)
+		})
 	}
 
 	r.GET("/ping", func(ctx *gin.Context) {

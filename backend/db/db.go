@@ -102,9 +102,10 @@ func (s *PostgresStore) CreateTask(tableName, name, description string, dueDate 
 	return tableName, nil
 }
 
-// GetTasks queries the database and returns a slice of tasks
 func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
-	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion FROM %s`, tableName)
+	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
+                            FROM %s
+                            ORDER BY due_date`, tableName)
 	rows, err := s.DB.Query(query)
 	if err != nil {
 		return nil, err
@@ -115,14 +116,14 @@ func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
 
 	for rows.Next() {
 		task := shared.Task{}
-		err := rows.Scan(&task.TaskID, &task.Name, &task.Description, &task.DueDate, &task.CompletionStatus)
+		err := rows.Scan(&task.TaskID, &task.Name, &task.Description, &task.DueDate, &task.CompletionStatus, &task.AccountId)
 		if err != nil {
 			return nil, err
 		}
 		tasks = append(tasks, task)
 	}
+	if err = rows.Err(); err != nil {
 
-	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
