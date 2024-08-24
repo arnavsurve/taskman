@@ -102,6 +102,7 @@ func (s *PostgresStore) CreateTask(tableName, name, description string, dueDate 
 	return tableName, nil
 }
 
+// GetTasks takes a user ID and the name of the target table and returns a slice of Task structs.
 func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
 	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
                             FROM %s
