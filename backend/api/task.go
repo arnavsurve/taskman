@@ -99,7 +99,8 @@ func HandleCreateTask(ctx *gin.Context, store *db.PostgresStore) {
 	ctx.JSON(http.StatusOK, gin.H{"table": name})
 }
 
-// HandleGetTasks ... TODO!!!
+// HandleGetTasks takes url parameters ID and workspace name. It calls GetTasks and returns a
+// JSON object holding task JSON objects.
 func HandleGetTasks(ctx *gin.Context, store *db.PostgresStore) {
 	userClaims := ctx.MustGet("user").(jwt.MapClaims)
 	userID := int(userClaims["id"].(float64))
