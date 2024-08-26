@@ -50,6 +50,9 @@ func main() {
 		authRoutes.GET("/task/:id/:workspace", func(ctx *gin.Context) {
 			api.HandleGetTasks(ctx, store)
 		})
+		authRoutes.GET("/task/:id/:workspace/:taskId", func(ctx *gin.Context) {
+			api.HandleGetTaskByID(ctx, store)
+		})
 	}
 
 	r.GET("/ping", func(ctx *gin.Context) {

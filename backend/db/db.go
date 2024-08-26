@@ -124,11 +124,25 @@ func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
 		tasks = append(tasks, task)
 	}
 	if err = rows.Err(); err != nil {
-
 		return nil, err
 	}
 
 	return tasks, nil
+}
+
+// GetTaskByID takes a task ID and table name and returns a Task struct
+func (s *PostgresStore) GetTaskByID(taskID, tableName string) (shared.Task, error) {
+	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
+                            FROM %s WHERE task_id = %s`, tableName, taskID)
+	row := s.DB.QueryRow(query)
+
+	task := shared.Task{}
+	err := row.Scan(&task.TaskID, &task.Name, &task.Description, &task.DueDate, &task.CompletionStatus, &task.AccountId)
+	if err != nil {
+		return task, err
+	}
+
+	return task, nil
 }
 
 // TableExists returns a boolean based on the existence of a table in the database
