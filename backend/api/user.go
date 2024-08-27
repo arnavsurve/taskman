@@ -2,7 +2,6 @@ package api
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -97,7 +96,7 @@ func GetUserByID(ctx *gin.Context, store *db.PostgresStore) (*shared.Account, er
 	row := store.DB.QueryRow(`select id,
 							username,
 							email,
-							created_at 
+							created_at
 							from accounts where id = $1`, intId)
 
 	account := shared.Account{}
@@ -130,8 +129,6 @@ func EditUser(ctx *gin.Context, store *db.PostgresStore) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	fmt.Println(account)
 
 	query := `update accounts set username = $1, email = $2 where id = $3`
 	_, err = store.DB.Exec(query, account.Username, account.Email, intId)

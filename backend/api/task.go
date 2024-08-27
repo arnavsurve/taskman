@@ -181,6 +181,52 @@ func HandleGetTaskByID(ctx *gin.Context, store *db.PostgresStore) {
 	ctx.JSON(http.StatusOK, gin.H{"task": task})
 }
 
+func HandleUpdateTaskByID(ctx *gin.Context, store *db.PostgresStore) {
+	userClaims := ctx.MustGet("user").(jwt.MapClaims)
+	userID := int(userClaims["id"].(float64))
+
+	// Verify user's ID matches ID of the resource
+	requestedID := ctx.Param("id")
+	intRequestedID, err := strconv.Atoi(requestedID)
+	if err != nil || intRequestedID != userID {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Verify existence of the requested workspace
+	workspaceName := ctx.Param("workspace")
+	requestedTable := fmt.Sprintf("t_%s_%s", requestedID, workspaceName)
+
+	exists, err := store.TableExists(requestedTable)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if table exists"})
+		return
+	}
+	if exists != true {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Table does not exist"})
+		return
+	}
+
+	taskID := ctx.Param("taskId")
+	task := shared.Task{}
+	if err := ctx.ShouldBindJSON(&task); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if task.Name == "" || task.Description == "" || task.CompletionStatus == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Task fields cannot be empty"})
+		return
+	}
+
+	err = store.UpdateTaskByID(taskID, requestedTable, task.Name, task.Description, task.DueDate, task.CompletionStatus)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Task successfully updated"})
+}
+
 // HandleDeleteTaskByID takes a user ID, workspace name, and task ID as URL parameters and
 // calls DeleteTaskByID on the target table
 func HandleDeleteTaskByID(ctx *gin.Context, store *db.PostgresStore) {

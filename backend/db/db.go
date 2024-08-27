@@ -145,6 +145,15 @@ func (s *PostgresStore) GetTaskByID(taskID, tableName string) (shared.Task, erro
 	return task, nil
 }
 
+func (s *PostgresStore) UpdateTaskByID(taskID, tableName, name, description string, dueDate time.Time, completion shared.CompletionStatus) error {
+	query := fmt.Sprintf(`UPDATE %s set name=$1, description=$2, due_date=$3, completion=$4 where task_id=$5`, pq.QuoteIdentifier(tableName))
+	_, err := s.DB.Exec(query, name, description, dueDate, completion, taskID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // DeleteTaskByID takes a task ID and table name and deletes the target row corresponding
 // with the target task
 func (s *PostgresStore) DeleteTaskByID(taskID, tableName string) error {
