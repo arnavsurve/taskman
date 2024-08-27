@@ -87,9 +87,9 @@ func (s *PostgresStore) CreateTasksTable(id, workspaceName string) (string, erro
 func (s *PostgresStore) CreateTask(tableName, name, description string, dueDate time.Time, completion shared.CompletionStatus, accountId int) (string, error) {
 	query := fmt.Sprintf(`INSERT INTO %s(
         name,
-        description, 
-        due_date, 
-        completion, 
+        description,
+        due_date,
+        completion,
         account_id)
         VALUES ($1, $2, $3, $4, $5)`, pq.QuoteIdentifier(tableName))
 
@@ -106,7 +106,7 @@ func (s *PostgresStore) CreateTask(tableName, name, description string, dueDate 
 func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
 	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
                             FROM %s
-                            ORDER BY due_date`, tableName)
+                            ORDER BY due_date`, pq.QuoteIdentifier(tableName))
 	rows, err := s.DB.Query(query)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
 // GetTaskByID takes a task ID and table name and returns a Task struct
 func (s *PostgresStore) GetTaskByID(taskID, tableName string) (shared.Task, error) {
 	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
-                            FROM %s WHERE task_id = %s`, tableName, taskID)
+                            FROM %s WHERE task_id = %s`, pq.QuoteIdentifier(tableName), taskID)
 	row := s.DB.QueryRow(query)
 
 	task := shared.Task{}
@@ -145,11 +145,22 @@ func (s *PostgresStore) GetTaskByID(taskID, tableName string) (shared.Task, erro
 	return task, nil
 }
 
+// DeleteTaskByID takes a task ID and table name and deletes the target row corresponding
+// with the target task
+func (s *PostgresStore) DeleteTaskByID(taskID, tableName string) error {
+	query := fmt.Sprintf(`DELETE from %s WHERE task_id = %s`, pq.QuoteIdentifier(tableName), taskID)
+	_, err := s.DB.Exec(query)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // TableExists returns a boolean based on the existence of a table in the database
 func (s *PostgresStore) TableExists(tableName string) (bool, error) {
 	query := `
         SELECT EXISTS (
-            SELECT FROM information_schema.tables 
+            SELECT FROM information_schema.tables
             WHERE table_schema = 'public'
             AND table_name = $1
         );`
