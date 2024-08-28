@@ -35,17 +35,21 @@ func main() {
 	authRoutes := r.Group("/")
 	authRoutes.Use(utils.AuthMiddleware())
 	{
+		// User routes
 		authRoutes.GET("/user/:id", func(ctx *gin.Context) {
 			api.GetUserByID(ctx, store)
 		})
 		authRoutes.PUT("/user/:id", func(ctx *gin.Context) {
 			api.EditUser(ctx, store)
 		})
+
+		// Workspace routes
 		authRoutes.POST("/workspace/:id", func(ctx *gin.Context) {
 			api.HandleCreateWorkspace(ctx, store)
 		})
 
-		authRoutes.POST("/task/:id/:workspace", func(ctx *gin.Context) {
+		// Task routes
+		authRoutes.POST("/task/:id/:workspaceId", func(ctx *gin.Context) {
 			api.HandleCreateTask(ctx, store)
 		})
 		authRoutes.GET("/task/:id/:workspace", func(ctx *gin.Context) {
@@ -54,7 +58,6 @@ func main() {
 		authRoutes.GET("/task/:id/:workspace/:taskId", func(ctx *gin.Context) {
 			api.HandleGetTaskByID(ctx, store)
 		})
-
 		authRoutes.PUT("/task/:id/:workspace/:taskId", func(ctx *gin.Context) {
 			api.HandleUpdateTaskByID(ctx, store)
 		})

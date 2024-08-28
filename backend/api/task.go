@@ -71,33 +71,33 @@ func HandleCreateTask(ctx *gin.Context, store *db.PostgresStore) {
 	}
 
 	// Checking if the requested table for the task exists
-	workspaceName := ctx.Param("workspace")
-	requestedTable := fmt.Sprintf("t_%s_%s", requestedID, workspaceName)
-	exists, err := store.TableExists(requestedTable)
+	workspaceID := ctx.Param("workspaceId")
+	intWorkspaceID, err := strconv.Atoi(workspaceID)
+	exists, err := store.WorkspaceExists(intWorkspaceID)
 	if exists != true {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Table does not exist"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Workspace does not exist"})
 		return
 	}
 
 	// Binding JSON body to a Task struct
-	newTask := shared.Task{}
-	if err := ctx.ShouldBindJSON(&newTask); err != nil {
+	task := shared.Task{}
+	if err := ctx.ShouldBindJSON(&task); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if newTask.Description == "" {
+	if task.Description == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Task description cannot be empty"})
 		return
 	}
 
-	name, err := store.CreateTask(newTask.Name, newTask.Description, newTask.DueDate, newTask.CompletionStatus, newTask.WorkspaceID, intRequestedID)
+	name, err := store.CreateTask(task.Name, task.Description, task.DueDate, task.CompletionStatus, intWorkspaceID, intRequestedID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating task"})
 		fmt.Println(err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"table": name})
+	ctx.JSON(http.StatusOK, gin.H{"success": "Successfully created task " + name})
 }
 
 // HandleGetTasks takes url parameters ID and workspace name. It calls GetTasks and returns a
