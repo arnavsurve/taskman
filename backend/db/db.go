@@ -45,8 +45,21 @@ func NewPostgresStore() (*PostgresStore, error) {
 	}, nil
 }
 
+// Init calls each of the table initialization functions and handles errors
 func (s *PostgresStore) Init() error {
-	return s.CreateAccountsTable()
+	initFunctions := []func() error{
+		s.CreateAccountsTable,
+		s.CreateWorkspacesTable,
+		s.CreateTasksTable,
+	}
+
+	for _, initFunc := range initFunctions {
+		if err := initFunc(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *PostgresStore) CreateAccountsTable() error {
@@ -59,47 +72,68 @@ func (s *PostgresStore) CreateAccountsTable() error {
     )`
 
 	_, err := s.DB.Exec(query)
-	return err
+	if err != nil {
+		return err
+	}
+	fmt.Println("Successfully created accounts table")
+	return nil
+}
+
+// CreateWorkspacesTable initializes the table to store information about each workspace
+func (s *PostgresStore) CreateWorkspacesTable() error {
+	query := `CREATE TABLE IF NOT EXISTS workspaces (
+        workspace_id SERIAL PRIMARY KEY,
+        name VARCHAR(50),
+        account_id INT REFERENCES accounts(id)
+        )`
+
+	_, err := s.DB.Exec(query)
+	if err != nil {
+		return err
+	}
+	fmt.Println("Successfully created workspaces table")
+	return nil
 }
 
 // CreateTasksTable creates a new table for a user's tasks with the naming convention t_{id}_{tableName}
-func (s *PostgresStore) CreateTasksTable(id, workspaceName string) (string, error) {
-	name := fmt.Sprintf("t_%s_%s", id, workspaceName)
-	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
+func (s *PostgresStore) CreateTasksTable() error {
+	query := `CREATE TABLE IF NOT EXISTS tasks (
         task_id serial primary key,
         name varchar(50),
 		description varchar(255),
 		due_date timestamp,
 		completion varchar(20) check (completion in ('todo', 'in_progress', 'done')),
+        workspace_id INT references workspaces(workspace_id),
 		account_id int references accounts(id)
-    )`, pq.QuoteIdentifier(name)) // Avoid SQL injection
+    )`
 
 	_, err := s.DB.Exec(query)
 	if err != nil {
-		return "", err
+		return err
 	} else {
-		fmt.Println("Created:", name)
+		fmt.Println("Successfully created tasks table")
 	}
-	return name, err
+	return nil
 }
 
-// CreateTask creates a new task in the table with the given name
-func (s *PostgresStore) CreateTask(tableName, name, description string, dueDate time.Time, completion shared.CompletionStatus, accountId int) (string, error) {
-	query := fmt.Sprintf(`INSERT INTO %s(
+// CreateTask creates a new task in the tasks table
+func (s *PostgresStore) CreateTask(name, description string, dueDate time.Time, completion shared.CompletionStatus, workspaceId, accountId int) (string, error) {
+	query := `INSERT INTO tasks(
         name,
         description,
         due_date,
         completion,
+        workspace_id
         account_id)
-        VALUES ($1, $2, $3, $4, $5)`, pq.QuoteIdentifier(tableName))
+        VALUES ($1, $2, $3, $4, $5)`
 
-	_, err := s.DB.Exec(query, name, description, dueDate, completion, accountId)
+	_, err := s.DB.Exec(query, name, description, dueDate, completion, workspaceId, accountId)
 	if err != nil {
 		return "", err
 	}
 
-	fmt.Println("Created:", tableName)
-	return tableName, nil
+	fmt.Println("Created task ", name, " in tasks table")
+	return name, nil
 }
 
 // GetTasks takes a user ID and the name of the target table and returns a slice of Task structs.
