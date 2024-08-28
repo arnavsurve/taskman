@@ -29,7 +29,14 @@ type Task struct {
 	Description      string           `json:"description"`
 	DueDate          time.Time        `json:"due_date"`   // ex. "due_date": "2023-10-06T15:04:05Z"
 	CompletionStatus CompletionStatus `json:"completion"` // todo, in_progress, done
+	WorkspaceID      int              `json:"workspace_id"`
 	AccountId        int              `json:"account_id"`
+}
+
+type Workspace struct {
+	WorkspaceID int    `json:"workspace_id"`
+	Name        string `json:"name"`
+	AccountId   int    `json:"account_id"`
 }
 
 type Table struct {
