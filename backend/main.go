@@ -41,8 +41,8 @@ func main() {
 		authRoutes.PUT("/user/:id", func(ctx *gin.Context) {
 			api.EditUser(ctx, store)
 		})
-		authRoutes.POST("/table/:id", func(ctx *gin.Context) {
-			api.HandleCreateTasksTable(ctx, store)
+		authRoutes.POST("/workspace/:id", func(ctx *gin.Context) {
+			api.HandleCreateWorkspace(ctx, store)
 		})
 
 		authRoutes.POST("/task/:id/:workspace", func(ctx *gin.Context) {
