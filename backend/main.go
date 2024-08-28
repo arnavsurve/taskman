@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+
 	// "os"
 
 	"github.com/arnavsurve/taskman/backend/api"
@@ -49,6 +50,16 @@ func main() {
 		})
 		authRoutes.GET("/task/:id/:workspace", func(ctx *gin.Context) {
 			api.HandleGetTasks(ctx, store)
+		})
+		authRoutes.GET("/task/:id/:workspace/:taskId", func(ctx *gin.Context) {
+			api.HandleGetTaskByID(ctx, store)
+		})
+
+		authRoutes.PUT("/task/:id/:workspace/:taskId", func(ctx *gin.Context) {
+			api.HandleUpdateTaskByID(ctx, store)
+		})
+		authRoutes.DELETE("/task/:id/:workspace/:taskId", func(ctx *gin.Context) {
+			api.HandleDeleteTaskByID(ctx, store)
 		})
 	}
 
