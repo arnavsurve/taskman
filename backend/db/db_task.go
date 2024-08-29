@@ -55,9 +55,9 @@ func (s *PostgresStore) GetTasks(id, workspaceId string) ([]shared.Task, error) 
 
 // GetTaskByID takes a task ID and table name and returns a Task struct
 func (s *PostgresStore) GetTaskByID(taskID, workspaceId string) (shared.Task, error) {
-	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
-								FROM tasks
-                                WHERE workspace_id=$1 AND task_id=$2`)
+	query := `SELECT task_id, name, description, due_date, completion, account_id
+						FROM tasks
+                        WHERE workspace_id=$1 AND task_id=$2`
 	row := s.DB.QueryRow(query, workspaceId, taskID)
 
 	task := shared.Task{}
