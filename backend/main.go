@@ -4,8 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	// "os"
-
 	"github.com/arnavsurve/taskman/backend/api"
 	"github.com/arnavsurve/taskman/backend/db"
 	"github.com/arnavsurve/taskman/backend/utils"
@@ -22,12 +20,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Initialize DB with an admin user
-	// adminUsername := os.Getenv("DB_ADMIN_USERNAME")
-	// adminPassword := os.Getenv("DB_ADMIN_PASSWORD")
-
-	// api.AddUser(, store)
-
 	// gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
@@ -35,30 +27,33 @@ func main() {
 	authRoutes := r.Group("/")
 	authRoutes.Use(utils.AuthMiddleware())
 	{
+		// User routes
 		authRoutes.GET("/user/:id", func(ctx *gin.Context) {
 			api.GetUserByID(ctx, store)
 		})
 		authRoutes.PUT("/user/:id", func(ctx *gin.Context) {
 			api.EditUser(ctx, store)
 		})
-		authRoutes.POST("/table/:id", func(ctx *gin.Context) {
-			api.HandleCreateTasksTable(ctx, store)
+
+		// Workspace routes
+		authRoutes.POST("/workspace/:id", func(ctx *gin.Context) {
+			api.HandleCreateWorkspace(ctx, store)
 		})
 
-		authRoutes.POST("/task/:id/:workspace", func(ctx *gin.Context) {
+		// Task routes
+		authRoutes.POST("/task/:id/:workspaceId", func(ctx *gin.Context) {
 			api.HandleCreateTask(ctx, store)
 		})
-		authRoutes.GET("/task/:id/:workspace", func(ctx *gin.Context) {
+		authRoutes.GET("/workspace/:id/:workspaceId", func(ctx *gin.Context) {
 			api.HandleGetTasks(ctx, store)
 		})
-		authRoutes.GET("/task/:id/:workspace/:taskId", func(ctx *gin.Context) {
+		authRoutes.GET("/task/:id/:workspaceId/:taskId", func(ctx *gin.Context) {
 			api.HandleGetTaskByID(ctx, store)
 		})
-
-		authRoutes.PUT("/task/:id/:workspace/:taskId", func(ctx *gin.Context) {
+		authRoutes.PUT("/task/:id/:workspaceId/:taskId", func(ctx *gin.Context) {
 			api.HandleUpdateTaskByID(ctx, store)
 		})
-		authRoutes.DELETE("/task/:id/:workspace/:taskId", func(ctx *gin.Context) {
+		authRoutes.DELETE("/task/:id/:workspaceId/:taskId", func(ctx *gin.Context) {
 			api.HandleDeleteTaskByID(ctx, store)
 		})
 	}
