@@ -12,49 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// HandleCreateTasksTable calls the CreateTasksTable function in db given a user's ID and name of the table.
-// On success, returns 400 and created table name.
-// func HandleCreateTasksTable(ctx *gin.Context, store *db.PostgresStore) {
-// 	userClaims := ctx.MustGet("user").(jwt.MapClaims)
-// 	userID := int(userClaims["id"].(float64))
-//
-// 	// Verify user's ID matches ID of the resource
-// 	requestedID := ctx.Param("id")
-// 	intRequestedID, err := strconv.Atoi(requestedID)
-// 	if err != nil || intRequestedID != userID {
-// 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-// 		return
-// 	}
-//
-// 	// Binding JSON body to a Table struct
-// 	table := shared.Table{}
-// 	if err := ctx.ShouldBindJSON(&table); err != nil {
-// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	if table.Name == "" {
-// 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Table name cannot be empty"})
-// 		return
-// 	}
-//
-// 	// Check if table exists
-// 	tableName := fmt.Sprintf("t_%s_%s", requestedID, table.Name)
-// 	if yes, err := store.TableExists(tableName); yes == true {
-// 		fmt.Println(err)
-// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Table already exists with that name"})
-// 		return
-// 	}
-//
-// 	name, err := store.CreateTasksTable(requestedID, table.Name)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create tasks table"})
-// 		return
-// 	}
-//
-// 	ctx.JSON(http.StatusOK, gin.H{"table_name": name})
-// }
-
 // HandleCreateTask calls the CreateTask function with user ID and target table passed as URL parameters.
 // Task attributes are read from Gin context (JSON request body) and passed to CreateTask.
 // A table's name is comprised of the user's ID and name of the workspace.
@@ -115,24 +72,27 @@ func HandleGetTasks(ctx *gin.Context, store *db.PostgresStore) {
 	}
 
 	// Checking if the requested table for the task exists
-	workspaceName := ctx.Param("workspace")
-	requestedTable := fmt.Sprintf("t_%s_%s", requestedID, workspaceName)
-
-	exists, err := store.TableExists(requestedTable)
+	workspaceId := ctx.Param("workspaceId")
+	intWorkspaceID, err := strconv.Atoi(workspaceId)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if table exists"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid workspace id"})
+	}
+
+	exists, err := store.WorkspaceExists(intWorkspaceID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if workspace exists"})
 		fmt.Println(err)
 		return
 	}
 	if exists != true {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Table does not exist"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Workspace does not exist"})
 		return
 	}
 
-	tasks, err := store.GetTasks(requestedID, requestedTable)
+	tasks, err := store.GetTasks(requestedID, workspaceId)
 	if err != nil {
 		fmt.Println(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving tasks"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server error"})
 		return
 	}
 
@@ -153,10 +113,9 @@ func HandleGetTaskByID(ctx *gin.Context, store *db.PostgresStore) {
 	}
 
 	// Verify existence of the requested workspace
-	workspaceName := ctx.Param("workspace")
-	requestedTable := fmt.Sprintf("t_%s_%s", requestedID, workspaceName)
-
-	exists, err := store.TableExists(requestedTable)
+	workspaceId := ctx.Param("workspaceId")
+	intWorkspaceID, err := strconv.Atoi(workspaceId)
+	exists, err := store.WorkspaceExists(intWorkspaceID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if table exists"})
 		return
@@ -167,7 +126,7 @@ func HandleGetTaskByID(ctx *gin.Context, store *db.PostgresStore) {
 	}
 
 	taskID := ctx.Param("taskId")
-	task, err := store.GetTaskByID(taskID, requestedTable)
+	task, err := store.GetTaskByID(taskID, workspaceId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Task does not exist"})
@@ -194,10 +153,10 @@ func HandleUpdateTaskByID(ctx *gin.Context, store *db.PostgresStore) {
 	}
 
 	// Verify existence of the requested workspace
-	workspaceName := ctx.Param("workspace")
-	requestedTable := fmt.Sprintf("t_%s_%s", requestedID, workspaceName)
+	workspaceId := ctx.Param("workspace")
+	intWorkspaceID, err := strconv.Atoi(workspaceId)
 
-	exists, err := store.TableExists(requestedTable)
+	exists, err := store.WorkspaceExists(intWorkspaceID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if table exists"})
 		return
@@ -219,7 +178,7 @@ func HandleUpdateTaskByID(ctx *gin.Context, store *db.PostgresStore) {
 		return
 	}
 
-	err = store.UpdateTaskByID(taskID, requestedTable, task.Name, task.Description, task.DueDate, task.CompletionStatus)
+	err = store.UpdateTaskByID(taskID, workspaceId, task.Name, task.Description, task.DueDate, task.CompletionStatus)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

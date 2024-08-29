@@ -31,18 +31,17 @@ func (s *PostgresStore) CreateTask(name, description string, dueDate time.Time, 
 }
 
 // GetTasks takes a user ID and the name of the target table and returns a slice of Task structs.
-func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
-	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
-                            FROM %s
-                            ORDER BY due_date`, pq.QuoteIdentifier(tableName))
-	rows, err := s.DB.Query(query)
+func (s *PostgresStore) GetTasks(id, workspaceId string) ([]shared.Task, error) {
+	query := `SELECT task_id, name, description, due_date, completion, account_id
+                            FROM tasks WHERE workspace_id=$1
+                            ORDER BY due_date`
+	rows, err := s.DB.Query(query, workspaceId)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var tasks []shared.Task
-
 	for rows.Next() {
 		task := shared.Task{}
 		err := rows.Scan(&task.TaskID, &task.Name, &task.Description, &task.DueDate, &task.CompletionStatus, &task.AccountId)
@@ -52,6 +51,7 @@ func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
 		tasks = append(tasks, task)
 	}
 	if err = rows.Err(); err != nil {
+		fmt.Println(err)
 		return nil, err
 	}
 
@@ -59,23 +59,23 @@ func (s *PostgresStore) GetTasks(id, tableName string) ([]shared.Task, error) {
 }
 
 // GetTaskByID takes a task ID and table name and returns a Task struct
-func (s *PostgresStore) GetTaskByID(taskID, tableName string) (shared.Task, error) {
+func (s *PostgresStore) GetTaskByID(taskID, workspaceId string) (shared.Task, error) {
 	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
-                            FROM %s WHERE task_id = %s`, pq.QuoteIdentifier(tableName), taskID)
-	row := s.DB.QueryRow(query)
+								FROM tasks
+                                WHERE workspace_id=$2 AND task_id=$1`)
+	row := s.DB.QueryRow(query, taskID, workspaceId)
 
 	task := shared.Task{}
 	err := row.Scan(&task.TaskID, &task.Name, &task.Description, &task.DueDate, &task.CompletionStatus, &task.AccountId)
 	if err != nil {
 		return task, err
 	}
-
 	return task, nil
 }
 
-func (s *PostgresStore) UpdateTaskByID(taskID, tableName, name, description string, dueDate time.Time, completion shared.CompletionStatus) error {
-	query := fmt.Sprintf(`UPDATE %s set name=$1, description=$2, due_date=$3, completion=$4 where task_id=$5`, pq.QuoteIdentifier(tableName))
-	_, err := s.DB.Exec(query, name, description, dueDate, completion, taskID)
+func (s *PostgresStore) UpdateTaskByID(taskID, workspaceId, name, description string, dueDate time.Time, completion shared.CompletionStatus) error {
+	query := `UPDATE tasks set name=$1, description=$2, due_date=$3, completion=$4 where task_id=$5 AND workspace_id=$6`
+	_, err := s.DB.Exec(query, name, description, dueDate, completion, taskID, workspaceId)
 	if err != nil {
 		return err
 	}
