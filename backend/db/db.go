@@ -113,8 +113,21 @@ func (s *PostgresStore) CreateTasksTable() error {
 	return nil
 }
 
+func (s *PostgresStore) TaskExists(workspaceId, taskId string) (bool, error) {
+	query := `SELECT EXISTS (
+        SELECT FROM tasks WHERE workspace_id=$1 AND task_id=$2
+    )`
+
+	var exists bool
+	err := s.DB.QueryRow(query, workspaceId, taskId).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, err
+}
+
 // WorkspaceExists returns true if a workspace exists in the workspaces table
-func (s *PostgresStore) WorkspaceExists(workspaceId int) (bool, error) {
+func (s *PostgresStore) WorkspaceExists(workspaceId string) (bool, error) {
 	query := `SELECT EXISTS (
         SELECT FROM workspaces WHERE workspace_id = $1
     )`

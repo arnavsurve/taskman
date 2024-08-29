@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/arnavsurve/taskman/backend/shared"
@@ -11,7 +10,7 @@ import (
 )
 
 // CreateTask creates a new task in the tasks table
-func (s *PostgresStore) CreateTask(name, description string, dueDate time.Time, completion shared.CompletionStatus, workspaceId, accountId int) (string, error) {
+func (s *PostgresStore) CreateTask(name, workspaceId, description string, dueDate time.Time, completion shared.CompletionStatus, accountId int) (string, error) {
 	query := `INSERT INTO tasks(
         name,
         description,
@@ -26,7 +25,7 @@ func (s *PostgresStore) CreateTask(name, description string, dueDate time.Time, 
 		return "", err
 	}
 
-	fmt.Println("Created task", name, "in workspace", strconv.Itoa(workspaceId))
+	fmt.Println("Created task", name, "in workspace", workspaceId)
 	return name, nil
 }
 
