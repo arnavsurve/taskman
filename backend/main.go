@@ -4,8 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	// "os"
-
 	"github.com/arnavsurve/taskman/backend/api"
 	"github.com/arnavsurve/taskman/backend/db"
 	"github.com/arnavsurve/taskman/backend/utils"
@@ -21,12 +19,6 @@ func main() {
 	if err := store.Init(); err != nil {
 		log.Fatal(err)
 	}
-
-	// Initialize DB with an admin user
-	// adminUsername := os.Getenv("DB_ADMIN_USERNAME")
-	// adminPassword := os.Getenv("DB_ADMIN_PASSWORD")
-
-	// api.AddUser(, store)
 
 	// gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()

@@ -204,21 +204,20 @@ func HandleDeleteTaskByID(ctx *gin.Context, store *db.PostgresStore) {
 	}
 
 	// Verify existence of the requested workspace
-	workspaceName := ctx.Param("workspace")
-	requestedTable := fmt.Sprintf("t_%s_%s", requestedID, workspaceName)
+	workspaceId := ctx.Param("workspaceId")
 
-	exists, err := store.TableExists(requestedTable)
+	exists, err := store.WorkspaceExists(workspaceId)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if table exists"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if workspace exists"})
 		return
 	}
 	if exists != true {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Table does not exist"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Workspace does not exist"})
 		return
 	}
 
 	taskID := ctx.Param("taskId")
-	err = store.DeleteTaskByID(taskID, requestedTable)
+	err = store.DeleteTaskByID(taskID, workspaceId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Task does not exist"})

@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/arnavsurve/taskman/backend/shared"
-	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 )
 
 // CreateTask creates a new task in the tasks table
@@ -24,8 +22,6 @@ func (s *PostgresStore) CreateTask(name, workspaceId, description string, dueDat
 	if err != nil {
 		return "", err
 	}
-
-	fmt.Println("Created task", name, "in workspace", workspaceId)
 	return name, nil
 }
 
@@ -61,8 +57,8 @@ func (s *PostgresStore) GetTasks(id, workspaceId string) ([]shared.Task, error) 
 func (s *PostgresStore) GetTaskByID(taskID, workspaceId string) (shared.Task, error) {
 	query := fmt.Sprintf(`SELECT task_id, name, description, due_date, completion, account_id
 								FROM tasks
-                                WHERE workspace_id=$2 AND task_id=$1`)
-	row := s.DB.QueryRow(query, taskID, workspaceId)
+                                WHERE workspace_id=$1 AND task_id=$2`)
+	row := s.DB.QueryRow(query, workspaceId, taskID)
 
 	task := shared.Task{}
 	err := row.Scan(&task.TaskID, &task.Name, &task.Description, &task.DueDate, &task.CompletionStatus, &task.AccountId)
@@ -83,9 +79,9 @@ func (s *PostgresStore) UpdateTaskByID(taskID, workspaceId, name, description st
 
 // DeleteTaskByID takes a task ID and table name and deletes the target row corresponding
 // with the target task
-func (s *PostgresStore) DeleteTaskByID(taskID, tableName string) error {
-	query := fmt.Sprintf(`DELETE from %s WHERE task_id = %s`, pq.QuoteIdentifier(tableName), taskID)
-	_, err := s.DB.Exec(query)
+func (s *PostgresStore) DeleteTaskByID(taskID, workspaceId string) error {
+	query := `DELETE from tasks WHERE task_id=$1 AND workspace_id=$2`
+	_, err := s.DB.Exec(query, taskID, workspaceId)
 	if err != nil {
 		return err
 	}
