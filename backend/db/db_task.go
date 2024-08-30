@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/arnavsurve/taskman/backend/shared"
@@ -23,34 +22,6 @@ func (s *PostgresStore) CreateTask(name, workspaceId, description string, dueDat
 		return "", err
 	}
 	return name, nil
-}
-
-// GetTasks takes a user ID and the name of the target table and returns a slice of Task structs.
-func (s *PostgresStore) GetTasks(id, workspaceId string) ([]shared.Task, error) {
-	query := `SELECT task_id, name, description, due_date, completion, account_id
-                            FROM tasks WHERE workspace_id=$1
-                            ORDER BY due_date`
-	rows, err := s.DB.Query(query, workspaceId)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var tasks []shared.Task
-	for rows.Next() {
-		task := shared.Task{}
-		err := rows.Scan(&task.TaskID, &task.Name, &task.Description, &task.DueDate, &task.CompletionStatus, &task.AccountId)
-		if err != nil {
-			return nil, err
-		}
-		tasks = append(tasks, task)
-	}
-	if err = rows.Err(); err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
-
-	return tasks, nil
 }
 
 // GetTaskByID takes a task ID and table name and returns a Task struct

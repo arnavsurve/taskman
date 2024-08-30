@@ -39,13 +39,16 @@ func main() {
 		authRoutes.POST("/workspace/:id", func(ctx *gin.Context) {
 			api.HandleCreateWorkspace(ctx, store)
 		})
+		authRoutes.GET("/workspace/:id/:workspaceId", func(ctx *gin.Context) {
+			api.HandleGetTasksFromWorkspace(ctx, store)
+		})
+		authRoutes.PUT("/workspace/:id/:workspaceId", func(ctx *gin.Context) {
+			api.HandleUpdateWorkspaceByID(ctx, store)
+		})
 
 		// Task routes
 		authRoutes.POST("/task/:id/:workspaceId", func(ctx *gin.Context) {
 			api.HandleCreateTask(ctx, store)
-		})
-		authRoutes.GET("/workspace/:id/:workspaceId", func(ctx *gin.Context) {
-			api.HandleGetTasks(ctx, store)
 		})
 		authRoutes.GET("/task/:id/:workspaceId/:taskId", func(ctx *gin.Context) {
 			api.HandleGetTaskByID(ctx, store)

@@ -56,43 +56,6 @@ func HandleCreateTask(ctx *gin.Context, store *db.PostgresStore) {
 	ctx.JSON(http.StatusOK, gin.H{"success": "Successfully created task " + name})
 }
 
-// HandleGetTasks takes url parameters ID and workspace name. It calls GetTasks and returns a
-// JSON object holding task JSON objects.
-func HandleGetTasks(ctx *gin.Context, store *db.PostgresStore) {
-	userClaims := ctx.MustGet("user").(jwt.MapClaims)
-	userID := int(userClaims["id"].(float64))
-
-	// Verify user's ID matches ID of the resource
-	requestedID := ctx.Param("id")
-	intRequestedID, err := strconv.Atoi(requestedID)
-	if err != nil || intRequestedID != userID {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Unauthorized"})
-		return
-	}
-
-	// Checking if the requested workspace for the task exists
-	workspaceId := ctx.Param("workspaceId")
-	exists, err := store.WorkspaceExists(workspaceId)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error checking if workspace exists"})
-		fmt.Println(err)
-		return
-	}
-	if exists != true {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Workspace does not exist"})
-		return
-	}
-
-	tasks, err := store.GetTasks(requestedID, workspaceId)
-	if err != nil {
-		fmt.Println(err)
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server error"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"tasks": tasks})
-}
-
 // HandleGetTaskByID takes a userID, workspace name, and task ID as URL parameters and returns a task
 func HandleGetTaskByID(ctx *gin.Context, store *db.PostgresStore) {
 	userClaims := ctx.MustGet("user").(jwt.MapClaims)
