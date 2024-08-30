@@ -48,7 +48,7 @@ func HandleCreateWorkspace(ctx *gin.Context, store *db.PostgresStore) {
 
 // HandleGetTasksFromWorkspace takes url parameters ID and workspace name. It calls GetTasks and returns a
 // JSON object holding task JSON objects.
-func HandleGetTasksFromWorkspace(ctx *gin.Context, store *db.PostgresStore) {
+func HandleGetTasksInWorkspace(ctx *gin.Context, store *db.PostgresStore) {
 	userClaims := ctx.MustGet("user").(jwt.MapClaims)
 	userID := int(userClaims["id"].(float64))
 
@@ -144,4 +144,25 @@ func HandleDeleteWorkspaceByID(ctx *gin.Context, store *db.PostgresStore) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"success": "Workspace successfully deleted"})
+}
+
+func HandleListWorkspaces(ctx *gin.Context, store *db.PostgresStore) {
+	userClaims := ctx.MustGet("user").(jwt.MapClaims)
+	userID := int(userClaims["id"].(float64))
+
+	// Verify user's ID matches ID of the resource
+	requestedID := ctx.Param("id")
+	intRequestedID, err := strconv.Atoi(requestedID)
+	if err != nil || intRequestedID != userID {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	workspaces, err := store.ListWorkspaces(requestedID)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"workspaces": workspaces})
 }

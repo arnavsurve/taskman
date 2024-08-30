@@ -79,3 +79,28 @@ func (s *PostgresStore) DeleteWorkspaceByID(accountId, workspaceId int) error {
 
 	return nil
 }
+
+func (s *PostgresStore) ListWorkspaces(accountId string) ([]shared.Workspace, error) {
+	query := `SELECT workspace_id, account_id, name FROM workspaces WHERE account_id=$1 ORDER BY workspace_id`
+	rows, err := s.DB.Query(query, accountId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var workspaces []shared.Workspace
+	for rows.Next() {
+		workspace := shared.Workspace{}
+		err := rows.Scan(&workspace.WorkspaceID, &workspace.AccountId, &workspace.Name)
+		if err != nil {
+			return nil, err
+		}
+		workspaces = append(workspaces, workspace)
+	}
+	if err := rows.Err(); err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return workspaces, nil
+}
