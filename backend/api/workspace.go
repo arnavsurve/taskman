@@ -121,3 +121,27 @@ func HandleUpdateWorkspaceByID(ctx *gin.Context, store *db.PostgresStore) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"success": "Workspace name successfully updated"})
 }
+
+func HandleDeleteWorkspaceByID(ctx *gin.Context, store *db.PostgresStore) {
+	userClaims := ctx.MustGet("user").(jwt.MapClaims)
+	userID := int(userClaims["id"].(float64))
+
+	// Verify user's ID matches ID of the resource
+	requestedID := ctx.Param("id")
+	intRequestedID, err := strconv.Atoi(requestedID)
+	if err != nil || intRequestedID != userID {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	workspaceId := ctx.Param("workspaceId")
+	intWorkspaceId, _ := strconv.Atoi(workspaceId)
+
+	err = store.DeleteWorkspaceByID(intRequestedID, intWorkspaceId)
+	if err != nil {
+		fmt.Println(err)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"success": "Workspace successfully deleted"})
+}

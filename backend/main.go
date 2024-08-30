@@ -45,6 +45,9 @@ func main() {
 		authRoutes.PUT("/workspace/:id/:workspaceId", func(ctx *gin.Context) {
 			api.HandleUpdateWorkspaceByID(ctx, store)
 		})
+		authRoutes.DELETE("/workspace/:id/:workspaceId", func(ctx *gin.Context) {
+			api.HandleDeleteWorkspaceByID(ctx, store)
+		})
 
 		// Task routes
 		authRoutes.POST("/task/:id/:workspaceId", func(ctx *gin.Context) {

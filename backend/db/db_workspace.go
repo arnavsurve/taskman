@@ -63,3 +63,19 @@ func (s *PostgresStore) UpdateWorkspaceByID(accountId, workspaceId int, name str
 	}
 	return nil
 }
+
+func (s *PostgresStore) DeleteWorkspaceByID(accountId, workspaceId int) error {
+	query := `DELETE FROM tasks WHERE account_id=$1 AND workspace_id=$2`
+	_, err := s.DB.Exec(query, accountId, workspaceId)
+	if err != nil {
+		return err
+	}
+
+	query = `DELETE FROM workspaces WHERE account_id=$1 AND workspace_id=$2`
+	_, err = s.DB.Exec(query, accountId, workspaceId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
