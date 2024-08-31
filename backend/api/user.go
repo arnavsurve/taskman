@@ -60,27 +60,35 @@ func AddUser(ctx *gin.Context, store *db.PostgresStore) {
 	}
 
 	newAccount := utils.NewAccount(account.Username, account.Password, account.Email) // NewAccount returns a hashed password BTW
-	query := `
+
+	query := `SELECT EXISTS (
+        SELECT FROM accounts WHERE email=$1 OR username=$2
+    )`
+
+	var exists bool
+	err := store.DB.QueryRow(query, newAccount.Email, newAccount.Username).Scan(&exists)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+	}
+	if exists == true {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "User already exists"})
+		return
+	}
+
+	query = `
         INSERT INTO accounts(username, password, email, created_at)
         VALUES ($1, $2, $3, $4)
         RETURNING id
     `
 	var userID int
-	err := store.DB.QueryRow(query, newAccount.Username, newAccount.Password, newAccount.Email, newAccount.CreatedAt).Scan(&userID)
+	err = store.DB.QueryRow(query, newAccount.Username, newAccount.Password, newAccount.Email, newAccount.CreatedAt).Scan(&userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		fmt.Println(err)
 		return
 	}
 
-	// Generate JWT token
-	token, err := utils.GenerateToken(newAccount.ID)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"token": token})
+	ctx.JSON(http.StatusOK, gin.H{"userId": userID})
 }
 
 // GetUserByID retrieves a user's id, username, email, and creation date from the database by ID
