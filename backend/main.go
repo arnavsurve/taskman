@@ -34,6 +34,9 @@ func main() {
 		authRoutes.PUT("/user/:id", func(ctx *gin.Context) {
 			api.EditUser(ctx, store)
 		})
+		authRoutes.DELETE("/user/:id", func(ctx *gin.Context) {
+			api.DeleteUser(ctx, store)
+		})
 
 		// Workspace routes
 		authRoutes.POST("/workspace/:id", func(ctx *gin.Context) {
