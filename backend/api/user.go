@@ -70,7 +70,7 @@ func AddUser(ctx *gin.Context, store *db.PostgresStore) {
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 	}
-	if exists == true {
+	if exists {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "User already exists"})
 		return
 	}
@@ -88,7 +88,7 @@ func AddUser(ctx *gin.Context, store *db.PostgresStore) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"userId": userID})
+	ctx.JSON(http.StatusOK, gin.H{"userid": userID})
 }
 
 // GetUserByID retrieves a user's id, username, email, and creation date from the database by ID
@@ -148,4 +148,36 @@ func EditUser(ctx *gin.Context, store *db.PostgresStore) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"message": "User successfully updated"})
+}
+
+func DeleteUser(ctx *gin.Context, store *db.PostgresStore) {
+	userClaims := ctx.MustGet("user").(jwt.MapClaims)
+	userID := int(userClaims["id"].(float64))
+
+	id := ctx.Param("id")
+	intId, err := strconv.Atoi(id)
+	if err != nil || userID != intId {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	queries := []string{
+		`DELETE FROM tasks WHERE account_id=$1;`,
+		`DELETE FROM workspaces WHERE account_id=$1;`,
+		`DELETE FROM accounts WHERE id=$1;`,
+	}
+
+	for _, query := range queries {
+		if err := executeDeleteQuery(store, query, userID); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"success": "Successfully deleted user, workspace, and task data"})
+}
+
+func executeDeleteQuery(store *db.PostgresStore, query string, userID int) error {
+	_, err := store.DB.Exec(query, userID)
+	return err
 }
