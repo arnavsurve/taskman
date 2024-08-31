@@ -23,7 +23,7 @@ func NewPostgresStore() (*PostgresStore, error) {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	user := os.Getenv("USER")
 	dbname := os.Getenv("DB_NAME")
-	password := os.Getenv("password")
+	password := os.Getenv("PASSWORD")
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", user, password, host, port, dbname)
 	db, err := sql.Open("postgres", connStr)
@@ -97,7 +97,7 @@ func (s *PostgresStore) CreateTasksTable() error {
 	query := `CREATE TABLE IF NOT EXISTS tasks (
         task_id serial primary key,
         name varchar(50),
-		description varchar(255),
+		description text,
 		due_date timestamp,
 		completion varchar(20) check (completion in ('todo', 'in_progress', 'done')),
         workspace_id INT references workspaces(workspace_id),
