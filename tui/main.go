@@ -27,7 +27,7 @@ var (
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
 )
 
-const url = "https://localhost:8080/login"
+const url = "http://localhost:8080/user"
 
 type model struct {
 	focusIndex int
@@ -50,7 +50,7 @@ func main() {
 
 func initialModel() model {
 	m := model{
-		inputs: make([]textinput.Model, 2),
+		inputs: make([]textinput.Model, 3),
 	}
 
 	var t textinput.Model
@@ -69,6 +69,9 @@ func initialModel() model {
 			t.Placeholder = "Password"
 			t.EchoMode = textinput.EchoPassword
 			t.EchoCharacter = '•'
+		case 2:
+			t.Placeholder = "Email"
+			t.CharLimit = 50
 		}
 
 		m.inputs[i] = t
@@ -111,7 +114,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				username := m.inputs[0].Value()
 				password := m.inputs[1].Value()
-				return m, m.submitForm(username, password)
+				email := m.inputs[2].Value()
+				return m, m.submitForm(username, password, email)
 			}
 
 			// Cycle indexes
@@ -187,19 +191,22 @@ func (m model) View() string {
 	return b.String()
 }
 
-func (m model) submitForm(username, password string) tea.Cmd {
+func (m model) submitForm(username, password, email string) tea.Cmd {
 	return func() tea.Msg {
 		data := map[string]string{
 			"username": username,
 			"password": password,
+			"email":    email,
 		}
 		jsonData, err := json.Marshal(data)
 		if err != nil {
+			log.Printf("Error: %v", err)
 			return errMsg{err}
 		}
 
 		resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
 		if err != nil {
+			log.Printf("Error: %v", err)
 			return errMsg{err}
 		}
 		defer resp.Body.Close()
@@ -209,6 +216,8 @@ func (m model) submitForm(username, password string) tea.Cmd {
 			return errMsg{err}
 		}
 
+		log.Printf("Response: %v", result)
+		log.Printf("Status: %d", resp.StatusCode)
 		return statusMsg(resp.StatusCode)
 	}
 }
