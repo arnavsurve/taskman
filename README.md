@@ -8,7 +8,7 @@
     - [Gin](https://github.com/gin-gonic/gin)
     - [Bubbletea](https://github.com/charmbracelet/bubbletea)
 - Postgres
-- SwiftUI/Svelte
+- SwiftUI/Sveltekit
 
 
 #### Roadmap
@@ -25,6 +25,6 @@
 
 - [ ] (low prio)
     - [ ] SwiftUI mobile MVP
-    - [ ] Svelte web application
+    - [ ] Sveltekit webview
 
 ![image](https://github.com/user-attachments/assets/69eebaf9-4b35-4e6f-ade1-33dddda20744)
