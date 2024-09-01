@@ -13,12 +13,12 @@
 
 #### Roadmap
 
-- [ ] Server-side logic
-    - [ ] DB architecture
-    - [ ] RESTful API endpoints
-    - [ ] JWT session authentication
+- [x] Server-side logic
+    - [x] DB architecture
+    - [x] RESTful API endpoints
+    - [x] JWT session authentication
 
-- [ ] TUI MVP
+- [ ] TUI MVP (in progress)
     - [ ] UI views
     - [ ] UX forward styling
     - [ ] Desktop notification daemon integration
