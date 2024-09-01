@@ -1,8 +1,11 @@
 # 📦 taskman
 
-### Cloud task management at terminal velocity. (WIP)
+Task management at terminal velocity. (WIP)
 
-### Stack
+![image](https://github.com/user-attachments/assets/e50d9531-4a17-4f80-a026-68b8bb3edfe7)
+
+
+## Stack
 
 - Go
     - [Gin](https://github.com/gin-gonic/gin)
@@ -11,7 +14,7 @@
 - SwiftUI/Sveltekit
 
 
-#### Roadmap
+## Roadmap
 
 - [x] Server-side logic
     - [x] DB architecture
@@ -26,5 +29,3 @@
 - [ ] (low prio)
     - [ ] SwiftUI mobile MVP
     - [ ] Sveltekit webview
-
-![image](https://github.com/user-attachments/assets/69eebaf9-4b35-4e6f-ade1-33dddda20744)
