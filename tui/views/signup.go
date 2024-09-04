@@ -32,6 +32,7 @@ func NewSignUpModel() tea.Model {
 		t = textinput.New()
 		t.Cursor.Style = shared.CursorStyle
 		t.CharLimit = 32
+		t.Prompt = "  "
 
 		switch i {
 		case 0:
@@ -39,6 +40,7 @@ func NewSignUpModel() tea.Model {
 			t.CharLimit = 50
 			t.PromptStyle = shared.FocusedStyle
 			t.TextStyle = shared.FocusedStyle
+			t.Prompt = "> "
 			t.Focus()
 		case 1:
 			t.Placeholder = "Username"
@@ -94,15 +96,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			cmds := make([]tea.Cmd, len(m.inputs))
-			for i := 0; i <= len(m.inputs)-1; i++ {
+			for i := range m.inputs {
 				if i == m.focusIndex {
 					// Set focused state
+					m.inputs[i].Prompt = "> "
 					cmds[i] = m.inputs[i].Focus()
 					m.inputs[i].PromptStyle = shared.FocusedStyle
 					m.inputs[i].TextStyle = shared.FocusedStyle
 					continue
 				}
 				// Remove focused state
+				m.inputs[i].Prompt = "  "
 				m.inputs[i].Blur()
 				m.inputs[i].PromptStyle = shared.NoStyle
 				m.inputs[i].TextStyle = shared.NoStyle
@@ -116,6 +120,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	cmd := m.updateInputs(msg)
 
 	return m, cmd
+}
+
+func NewCustomTextInput(prompt string, focused bool) textinput.Model {
+	t := textinput.New()
+	t.Prompt = prompt
+
+	if focused {
+		t.Focus()
+	}
+
+	return t
 }
 
 func (m model) updateInputs(msg tea.Msg) tea.Cmd {
@@ -157,8 +172,8 @@ func (m model) submitForm(username, password, email string) tea.Cmd {
 			return errMsg{err}
 		}
 
-		log.Printf("Response: %v", result)
-		log.Printf("Status: %d", resp.StatusCode)
+		log.Printf("\nResponse: %v", result)
+		log.Printf("\nStatus: %d", resp.StatusCode)
 		return statusMsg(resp.StatusCode)
 	}
 }
@@ -166,7 +181,7 @@ func (m model) submitForm(username, password, email string) tea.Cmd {
 func (m model) View() string {
 	var b strings.Builder
 
-	b.WriteString(shared.HelpStyle.Render("\n"))
+	b.WriteString(shared.NoStyle.Render("\nSign Up\n\n"))
 
 	for i := range m.inputs {
 		b.WriteString(m.inputs[i].View())
@@ -181,7 +196,7 @@ func (m model) View() string {
 	}
 	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
 
-	b.WriteString(shared.HelpStyle.Render("ctrl+c/esc to exit"))
+	b.WriteString(shared.HelpStyle.Render("Ctrl+c or esc to quit"))
 
 	return b.String()
 }
