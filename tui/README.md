@@ -10,6 +10,7 @@ register
 workspaces (dashboard)
 - new workspace
 - browse/select workspaces
+- edit workspace (name)
 
 workspace
 - browse/select tasks
