@@ -79,20 +79,20 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	// Login routes
 	r.GET("/login", func(ctx *gin.Context) {
 		api.Login(ctx, store)
 	})
-	// r.GET("/login/google", func(ctx *gin.Context) {
-	// 	utils.HandleGoogleLogin(ctx)
-	// })
+	r.POST("/user", func(ctx *gin.Context) {
+		api.AddUser(ctx, store)
+	})
+
 	r.GET("/login/github", func(ctx *gin.Context) {
 		auth.GithubLogin(ctx)
 	})
 	r.GET("/oauth2/callback", func(ctx *gin.Context) {
 		auth.GithubCallback(ctx)
-	})
-	r.POST("/user", func(ctx *gin.Context) {
-		api.AddUser(ctx, store)
 	})
 
 	err = r.Run(":8080")
