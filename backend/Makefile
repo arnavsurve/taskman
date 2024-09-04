@@ -1,8 +1,8 @@
 build:
-	@go build -o bin/taskman
+	go build -o bin/taskman
 
 run: build
-	@./bin/taskman
+	./bin/taskman
 
 test:
-	@go test -v ./...
+	go test -v ./...

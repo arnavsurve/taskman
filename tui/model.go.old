@@ -1,0 +1,22 @@
+package main
+
+import (
+	"github.com/arnavsurve/taskman/tui/shared"
+	"github.com/arnavsurve/taskman/tui/views"
+)
+
+type Model struct {
+	CurrentView shared.ViewType
+	SignUp      views.SignUpModel
+	// Login       views.LoginModel
+	// Dashboard   views.DashboardModel
+}
+
+func InitialModel() Model {
+	return Model{
+		CurrentView: shared.ViewSignUp,
+		SignUp:      views.NewSignUpModel(),
+		// Login:       views.NewLoginModel(),
+		// Dashboard:   views.NewDashboardModel(),
+	}
+}
