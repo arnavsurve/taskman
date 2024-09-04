@@ -1,0 +1,89 @@
+package utils
+
+import (
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+)
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Printf("error loading .env file: %s", err)
+	}
+}
+
+func GetGoogleOauthConfig() (*oauth2.Config, error) {
+	file, err := os.Open("../secrets/client_secret_527170180916-d9mvtsqab7c8dfvrhjhd9vqjo691s6gp.apps.googleusercontent.com.json")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	fileContents, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse the file to get the config
+	config, err := google.ConfigFromJSON(fileContents, "https://www.googleapis.com/auth/userinfo.email")
+	if err != nil {
+		return nil, err
+	}
+
+	return config, nil
+}
+
+var (
+	googleOauthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("OAUTH_CLIENT_ID"),
+		ClientSecret: os.Getenv("OAUTH_CLIENT_SECRET"),
+		RedirectURL:  os.Getenv("OAUTH_REDIRECT_URL"),
+		Scopes:       []string{"read:user", "user:email"},
+		Endpoint:     google.Endpoint,
+	}
+	oauthStateString = "naramode247ts"
+)
+
+func HandleGoogleLogin(ctx *gin.Context) {
+	url := googleOauthConfig.AuthCodeURL(oauthStateString)
+	ctx.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+func handleGoogleCallback(c *gin.Context) {
+	state := c.DefaultQuery("state", "")
+	if state != oauthStateString {
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+		return
+	}
+
+	code := c.DefaultQuery("code", "")
+	token, err := googleOauthConfig.Exchange(c, code)
+	if err != nil {
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+		return
+	}
+
+	client := googleOauthConfig.Client(c, token)
+	userInfoResp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
+	if err != nil {
+		c.Redirect(http.StatusTemporaryRedirect, "/")
+		return
+	}
+	defer userInfoResp.Body.Close()
+
+	// Process user info
+	c.Redirect(http.StatusSeeOther, "/welcome")
+}
+
+func main() {
+}
