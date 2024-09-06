@@ -92,7 +92,7 @@ func main() {
 		auth.GithubLogin(ctx)
 	})
 	r.GET("/oauth2/callback", func(ctx *gin.Context) {
-		auth.GithubCallback(ctx)
+		auth.GithubCallback(ctx, store)
 	})
 
 	err = r.Run(":8080")

@@ -59,7 +59,7 @@ func AddUser(ctx *gin.Context, store *db.PostgresStore) {
 		return
 	}
 
-	newAccount := utils.NewAccount(account.Username, account.Password, account.Email) // NewAccount returns a hashed password BTW
+	newAccount := utils.NewAccount(account.Username, account.Password, account.Email) // NewAccount contains a hashed password BTW
 
 	query := `SELECT EXISTS (
         SELECT FROM accounts WHERE email=$1 OR username=$2

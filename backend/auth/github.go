@@ -2,10 +2,13 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
+	"github.com/arnavsurve/taskman/backend/db"
+	"github.com/arnavsurve/taskman/backend/shared"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +18,7 @@ func GithubLogin(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
-func GithubCallback(c *gin.Context) {
+func GithubCallback(c *gin.Context, store *db.PostgresStore) {
 	state := c.Query("state")
 	if state != "randomstate" {
 		c.String(http.StatusBadRequest, "States don't match!")
@@ -24,7 +27,6 @@ func GithubCallback(c *gin.Context) {
 
 	// Get code from the query
 	code := c.Query("code")
-	fmt.Println(code)
 	if code == "" {
 		c.String(http.StatusBadRequest, "No code in request")
 		return
@@ -62,4 +64,33 @@ func GithubCallback(c *gin.Context) {
 	}
 
 	c.String(http.StatusOK, string(userData))
+
+	// Variable to hold the parsed data
+	var githubAccount shared.GitHubAccount
+	// Parse (unmarshal) the JSON into the struct
+	err = json.Unmarshal([]byte(userData), &githubAccount)
+	if err != nil {
+		fmt.Println("Error parsing JSON:", err)
+		return
+	}
+
+	githubAccount.OAuthToken = token.AccessToken
+
+	// Check if user already exists in accounts table
+	if exists, _ := store.CheckGitHubUserExists(githubAccount.GitHubID); exists == true {
+		fmt.Println("exists")
+		return
+	}
+
+	// Map GitHubAccount fields to Account struct
+	account := shared.NewGitHubAccount(githubAccount)
+
+	// Create entry in accounts table for this user
+	err = store.CreateGitHubAccount(account)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("created user")
+
 }
