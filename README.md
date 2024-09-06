@@ -10,16 +10,18 @@ Task management at terminal velocity. (WIP)
 - Go
     - [Gin](https://github.com/gin-gonic/gin)
     - [Bubbletea](https://github.com/charmbracelet/bubbletea)
-- Postgres
+    - [Cobra](https://github.com/spf13/cobra)
+- PostgreSQL
 - SwiftUI/Sveltekit
 
 
 ## Roadmap
 
 - [x] Server-side logic
-    - [x] DB architecture
+    - [x] Database architecture
     - [x] RESTful API endpoints
     - [x] JWT session authentication
+    - [ ] OAuth2.0 integration
 
 - [ ] TUI MVP (in progress)
     - [ ] UI views
