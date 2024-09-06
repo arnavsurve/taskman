@@ -18,9 +18,10 @@ Task management at terminal velocity. (WIP)
 ## Roadmap
 
 - [x] Server-side logic
-    - [x] DB architecture
+    - [x] Database architecture
     - [x] RESTful API endpoints
     - [x] JWT session authentication
+    - [ ] OAuth2.0 integration
 
 - [ ] TUI MVP (in progress)
     - [ ] UI views
