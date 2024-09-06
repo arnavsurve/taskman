@@ -10,7 +10,8 @@ Task management at terminal velocity. (WIP)
 - Go
     - [Gin](https://github.com/gin-gonic/gin)
     - [Bubbletea](https://github.com/charmbracelet/bubbletea)
-- Postgres
+    - [Cobra](https://github.com/spf13/cobra)
+- PostgreSQL
 - SwiftUI/Sveltekit
 
 
