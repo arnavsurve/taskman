@@ -25,7 +25,7 @@ Task management at terminal velocity. (WIP)
 
 - [ ] TUI MVP (in progress)
     - [ ] UI views
-    - [ ] UX forward styling
+    - [ ] User stories 
     - [ ] Desktop notification daemon integration
 
 - [ ] (low prio)
