@@ -96,18 +96,20 @@ func GetUserByID(ctx *gin.Context, store *db.PostgresStore) (*shared.Account, er
 	userClaims := ctx.MustGet("user").(jwt.MapClaims)
 	userID := int(userClaims["id"].(float64))
 
-	id := ctx.Param("id")
-	intId, err := strconv.Atoi(id)
-	if err != nil || userID != intId {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return nil, err
-	}
+	// id := ctx.Param("id")
+	// intId, err := strconv.Atoi(id)
+	// if err != nil || userID != intId {
+	// 	ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+	// 	return nil, err
+	// }
 
+	fmt.Println(userID)
+	var err error
 	row := store.DB.QueryRow(`select id,
 							username,
 							email,
 							created_at
-							from accounts where id = $1`, intId)
+							from accounts where id = $1`, userID)
 
 	account := shared.Account{}
 	err = row.Scan(&account.ID, &account.Username, &account.Email, &account.CreatedAt)

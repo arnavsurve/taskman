@@ -12,6 +12,7 @@ import (
 type Config struct {
 	GitHubLoginConfig oauth2.Config
 	// add other oauth providers here and configure with a function below
+	// then remember to call the function in main (see auth.GithubConfig())
 }
 
 var AppConfig Config

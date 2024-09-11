@@ -9,6 +9,7 @@ import (
 
 	"github.com/arnavsurve/taskman/backend/db"
 	"github.com/arnavsurve/taskman/backend/shared"
+	"github.com/arnavsurve/taskman/backend/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -73,24 +74,36 @@ func GithubCallback(c *gin.Context, store *db.PostgresStore) {
 		fmt.Println("Error parsing JSON:", err)
 		return
 	}
-
 	githubAccount.OAuthToken = token.AccessToken
-
-	// Check if user already exists in accounts table
-	if exists, _ := store.CheckGitHubUserExists(githubAccount.GitHubID); exists == true {
-		fmt.Println("exists")
-		return
-	}
 
 	// Map GitHubAccount fields to Account struct
 	account := shared.NewGitHubAccount(githubAccount)
 
-	// Create entry in accounts table for this user
-	err = store.CreateGitHubAccount(account)
+	// Check if user already exists in accounts table
+	if exists, _ := store.CheckGitHubUserExists(githubAccount.GitHubID); exists == false {
+		// Create entry in accounts table for this user
+		err = store.CreateGitHubAccount(account)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+
+	// Retrieve user ID
+	var userID int
+	query := `select id from accounts where github_id= $1`
+	err = store.DB.QueryRow(query, githubAccount.GitHubID).Scan(&userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user ID"})
+		return
+	}
+
+	// Generate JWT token
+	JWT, err := utils.GenerateToken(userID)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("created user")
-
+	fmt.Printf("JWT: %s\n", JWT)
+	c.JSON(http.StatusOK, gin.H{"token": JWT})
 }
