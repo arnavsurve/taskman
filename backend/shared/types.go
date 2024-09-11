@@ -2,6 +2,7 @@ package shared
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"strings"
 	"time"
 )
 
@@ -45,9 +46,29 @@ type Table struct {
 }
 
 type Account struct {
-	ID        int       `json:"id"`
-	Username  string    `json:"username"`
-	Password  string    `json:"password"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"createdAt"`
+	ID         int       `json:"id"`
+	Username   string    `json:"username"`
+	Password   string    `json:"password"`
+	Email      string    `json:"email"`
+	GitHubID   int       `json:"github_id,omitempty"`
+	OAuthToken string    `json:"token,omitempty"`
+	CreatedAt  time.Time `json:"createdAt"`
+}
+
+type GitHubAccount struct {
+	Login      string `json:"login"`
+	GitHubID   int    `json:"id"`
+	Email      string `json:"email"`
+	OAuthToken string `json:"token"`
+}
+
+// NewGitHubAccount returns an Account object with fields specific to a GitHub OAuth user
+func NewGitHubAccount(account GitHubAccount) *Account {
+	return &Account{
+		Username:   account.Login,
+		Email:      strings.ToLower(account.Email),
+		GitHubID:   account.GitHubID,
+		OAuthToken: account.OAuthToken,
+		CreatedAt:  time.Now().UTC(),
+	}
 }

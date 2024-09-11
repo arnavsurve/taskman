@@ -62,9 +62,11 @@ func (s *PostgresStore) Init() error {
 func (s *PostgresStore) CreateAccountsTable() error {
 	query := `CREATE TABLE IF NOT EXISTS accounts (
         id serial primary key,
-        username varchar(50),
-        password varchar,
-        email varchar unique,
+        username varchar(50) NOT NULL,
+        password varchar(60),
+        email varchar(255) UNIQUE NOT NULL,
+        github_id int UNIQUE,
+        oauth_token varchar(255),
         created_at timestamp
     )`
 
@@ -72,7 +74,7 @@ func (s *PostgresStore) CreateAccountsTable() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Successfully created accounts table")
+	fmt.Println("Successfully initialized accounts table")
 	return nil
 }
 
@@ -88,7 +90,7 @@ func (s *PostgresStore) CreateWorkspacesTable() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("Successfully created workspaces table")
+	fmt.Println("Successfully initialized workspaces table")
 	return nil
 }
 
@@ -108,7 +110,7 @@ func (s *PostgresStore) CreateTasksTable() error {
 	if err != nil {
 		return err
 	} else {
-		fmt.Println("Successfully created tasks table")
+		fmt.Println("Successfully initialized tasks table")
 	}
 	return nil
 }
