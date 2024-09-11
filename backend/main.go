@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/arnavsurve/taskman/backend/api"
+	"github.com/arnavsurve/taskman/backend/auth"
 	"github.com/arnavsurve/taskman/backend/db"
 	"github.com/arnavsurve/taskman/backend/utils"
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,9 @@ func main() {
 	if err := store.Init(); err != nil {
 		log.Fatal(err)
 	}
+
+	// initializing GitHub OAuth config
+	auth.GithubConfig()
 
 	// gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
@@ -75,11 +79,20 @@ func main() {
 			"message": "pong",
 		})
 	})
+
+	// Login routes
 	r.GET("/login", func(ctx *gin.Context) {
 		api.Login(ctx, store)
 	})
 	r.POST("/user", func(ctx *gin.Context) {
 		api.AddUser(ctx, store)
+	})
+
+	r.GET("/login/github", func(ctx *gin.Context) {
+		auth.GithubLogin(ctx)
+	})
+	r.GET("/oauth2/callback", func(ctx *gin.Context) {
+		auth.GithubCallback(ctx, store)
 	})
 
 	err = r.Run(":8080")
