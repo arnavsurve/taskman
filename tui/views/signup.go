@@ -16,14 +16,14 @@ import (
 type statusMsg int
 type errMsg struct{ error }
 
-type model struct {
+type signupModel struct {
 	focusIndex int
 	inputs     []textinput.Model
 }
 
 func NewSignUpModel() tea.Model {
 
-	m := model{
+	m := signupModel{
 		inputs: make([]textinput.Model, 3),
 	}
 
@@ -56,11 +56,11 @@ func NewSignUpModel() tea.Model {
 	return m
 }
 
-func (m model) Init() tea.Cmd {
+func (m signupModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m signupModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -118,7 +118,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Handle character input and blinking
 	cmd := m.updateInputs(msg)
-
 	return m, cmd
 }
 
@@ -133,7 +132,7 @@ func NewCustomTextInput(prompt string, focused bool) textinput.Model {
 	return t
 }
 
-func (m model) updateInputs(msg tea.Msg) tea.Cmd {
+func (m signupModel) updateInputs(msg tea.Msg) tea.Cmd {
 	cmds := make([]tea.Cmd, len(m.inputs))
 
 	// Only text inputs with Focus() set will respond, so it's safe to simply
@@ -145,7 +144,7 @@ func (m model) updateInputs(msg tea.Msg) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (m model) submitForm(username, password, email string) tea.Cmd {
+func (m signupModel) submitForm(username, password, email string) tea.Cmd {
 	return func() tea.Msg {
 		data := map[string]string{
 			"username": username,
@@ -178,7 +177,7 @@ func (m model) submitForm(username, password, email string) tea.Cmd {
 	}
 }
 
-func (m model) View() string {
+func (m signupModel) View() string {
 	var b strings.Builder
 
 	b.WriteString(shared.NoStyle.Render("\nSign Up\n\n"))
@@ -196,7 +195,7 @@ func (m model) View() string {
 	}
 	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
 
-	b.WriteString(shared.HelpStyle.Render("Ctrl+c or esc to quit"))
+	b.WriteString(shared.HelpStyle.Render("ctrl+c or esc to quit"))
 
 	return b.String()
 }
