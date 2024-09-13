@@ -19,7 +19,7 @@ var signupCmd = &cobra.Command{
 }
 
 func startSignupTUI() error {
-	p := tea.NewProgram(views.NewSignUpModel())
+	p := tea.NewProgram(views.NewParentModel())
 	_, err := p.Run()
 	return err
 }
