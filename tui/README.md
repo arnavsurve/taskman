@@ -1,5 +1,7 @@
 # TUI
 
+[color palette reference](https://coolors.co/8992be-fcfcfc-049f95-22333b-0a0908)
+
 log in
 - screen 1
 - route to workspaces
