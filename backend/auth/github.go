@@ -80,11 +80,12 @@ func GithubCallback(c *gin.Context, store *db.PostgresStore) {
 	account := shared.NewGitHubAccount(githubAccount)
 
 	// Check if user already exists in accounts table
-	if exists, _ := store.CheckGitHubUserExists(githubAccount.GitHubID); exists == false {
+	if exists, _ := store.CheckGitHubUserExists(githubAccount.GitHubID, githubAccount.Email); exists == false {
 		// Create entry in accounts table for this user
 		err = store.CreateGitHubAccount(account)
 		if err != nil {
 			fmt.Println(err)
+			c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
 			return
 		}
 	}

@@ -88,7 +88,7 @@ func main() {
 		api.AddUser(ctx, store)
 	})
 
-	r.GET("/login/github", func(ctx *gin.Context) {
+	r.GET("/oauth2/github", func(ctx *gin.Context) {
 		auth.GithubLogin(ctx)
 	})
 	r.GET("/oauth2/callback", func(ctx *gin.Context) {
