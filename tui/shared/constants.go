@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -27,7 +28,7 @@ var (
 			Foreground(lipgloss.Color(White)).
 			Background(lipgloss.Color(Verdigris)).
 			Padding(0, 1).
-			Margin(1)
+			MarginTop(1)
 
 	FocusedButton = FocusedStyle.Render("[ Submit ]")
 	BlurredButton = fmt.Sprintf("[ %s ]", BlurredStyle.Render("Submit"))

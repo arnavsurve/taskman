@@ -1,8 +1,18 @@
 package views
 
 import (
+	"github.com/arnavsurve/taskman/tui/shared"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+)
+
+var (
+	appStyle = lipgloss.NewStyle().Padding(1, 2)
+
+	statusMessageStyle = lipgloss.NewStyle().
+				Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"}).
+				Render
 )
 
 type item struct {
@@ -16,6 +26,19 @@ func (i item) FilterValue() string { return i.title }
 type signupOptionsModel struct {
 	list     list.Model
 	selected list.Item
+}
+
+func NewSignUpOptionsModel() signupOptionsModel {
+	items := []list.Item{
+		item{title: "Create an account", desc: "Sign up using your email, create a username and password"},
+		item{title: "Sign in with GitHub", desc: "Sign in using your GitHub account"},
+	}
+
+	m := signupOptionsModel{list: list.New(items, list.NewDefaultDelegate(), 60, 20)}
+	m.list.Title = "Sign Up"
+	m.list.Styles.Title = shared.TitleStyle
+
+	return m
 }
 
 func (m signupOptionsModel) Init() tea.Cmd {
@@ -32,10 +55,15 @@ func (m signupOptionsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
-				if i.title == "Sign up" {
-					return NewSignUpModel(), nil
+				if i.title == "Create an account" {
+					return parentModel{currentModel: NewSignUpModel()}, tea.Batch(
+						func() tea.Msg { return switchToSignUpMsg{} },
+					)
 				} else if i.title == "Sign in with GitHub" {
-					return NewOAuthModel(), nil
+					// return NewOAuthModel(), nil
+					return parentModel{currentModel: NewOAuthModel()}, tea.Batch(
+						func() tea.Msg { return switchToOAuthMsg{} },
+					)
 				}
 			}
 		}
@@ -49,17 +77,12 @@ func (m signupOptionsModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m signupOptionsModel) View() string {
-	return m.list.View()
-}
+	listView := m.list.View()
 
-func NewSignUpOptionsModel() signupOptionsModel {
-	items := []list.Item{
-		item{title: "Sign up", desc: "Sign up with your email, create a username and password"},
-		item{title: "Sign in with GitHub", desc: "Sign in using your GitHub account"},
-	}
+	styledListView := shared.FocusedStyle.Render(listView)
+	// styledListView := lipgloss.NewStyle().
+	// 	Foreground(lipgloss.Color("240")).
+	// 	Render(listView)
 
-	m := signupOptionsModel{list: list.New(items, list.NewDefaultDelegate(), 60, 20)}
-	m.list.Title = "Sign Up"
-
-	return m
+	return styledListView
 }

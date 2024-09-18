@@ -13,8 +13,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type statusMsg int
-type errMsg struct{ error }
+type (
+	statusMsg int
+	errMsg    struct{ error }
+)
 
 type signupModel struct {
 	focusIndex int
@@ -22,7 +24,6 @@ type signupModel struct {
 }
 
 func NewSignUpModel() tea.Model {
-
 	m := signupModel{
 		inputs: make([]textinput.Model, 3),
 	}
@@ -179,8 +180,7 @@ func (m signupModel) submitForm(username, password, email string) tea.Cmd {
 
 func (m signupModel) View() string {
 	var b strings.Builder
-
-	b.WriteString(shared.NoStyle.Render("\nSign Up\n\n"))
+	b.WriteString("\n\n")
 
 	for i := range m.inputs {
 		b.WriteString(m.inputs[i].View())
@@ -193,7 +193,7 @@ func (m signupModel) View() string {
 	if m.focusIndex == len(m.inputs) {
 		button = &shared.FocusedButton
 	}
-	fmt.Fprintf(&b, "\n\n%s\n\n", *button)
+	fmt.Fprintf(&b, "\n\n %s\n\n", *button)
 
 	b.WriteString(shared.HelpStyle.Render("ctrl+c or esc to quit"))
 

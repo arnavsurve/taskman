@@ -1,0 +1,34 @@
+package views
+
+import (
+	"github.com/arnavsurve/taskman/tui/shared"
+	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+)
+
+// CustomDelegate customizes the appearance of list items
+type CustomDelegate struct {
+	itemStyle         lipgloss.Style
+	selectedItemStyle lipgloss.Style
+}
+
+func NewCustomDelegate() CustomDelegate {
+	return CustomDelegate{
+		itemStyle:         shared.BlurredStyle,
+		selectedItemStyle: shared.FocusedStyle,
+	}
+}
+
+func (d CustomDelegate) Render(w, h int, item list.Item, index int) string {
+	i := item
+	style := d.itemStyle
+	if index == list.SelectedIndex {
+		style = d.selectedItemStyle
+	}
+	return style.Render(i.Title())
+}
+
+func (d CustomDelegate) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return nil, nil
+}

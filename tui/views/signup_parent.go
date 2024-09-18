@@ -16,8 +16,10 @@ type parentModel struct {
 	currentModel tea.Model
 }
 
-type switchToOAuthMsg struct{}
-type switchToSignUpMsg struct{}
+type (
+	switchToOAuthMsg  struct{}
+	switchToSignUpMsg struct{}
+)
 
 // NewParentModel initializes the parent model with the child models.
 func NewParentModel() parentModel {
