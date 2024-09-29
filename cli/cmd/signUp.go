@@ -7,6 +7,10 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/arnavsurve/taskman/cli/handlers"
+	"github.com/arnavsurve/taskman/cli/views"
+	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/spf13/cobra"
 )
 
@@ -18,9 +22,13 @@ var signUpCmd = &cobra.Command{
 	Short: "Register with taskman.",
 	Long:  `Register with taskman.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("signup called")
 		if github {
-			fmt.Println("github called")
+			m := tea.NewProgram(views.NewOAuthModel())
+			if _, err := m.Run(); err != nil {
+				fmt.Print(err)
+			}
+		} else {
+			handlers.HandleSignUp()
 		}
 	},
 }
