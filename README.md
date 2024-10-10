@@ -21,7 +21,7 @@ Task management at terminal velocity. (WIP)
     - [x] Database architecture
     - [x] RESTful API endpoints
     - [x] JWT session authentication
-    - [ ] OAuth2.0 integration
+    - [x] GitHub OAuth2.0 integration
 
 - [ ] TUI MVP (in progress)
     - [ ] UI views
