@@ -1,6 +1,6 @@
 # 📦 taskman
 
-Task management at terminal velocity
+Task management, at terminal velocity. 🚀
 
 ![image](https://github.com/user-attachments/assets/42bcc928-006c-4bbb-8c3c-ea58394d35b1)
 
